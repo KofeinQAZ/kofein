@@ -1,11 +1,17 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import logo from "@/assets/logo-updated.png";
+import logo from "@/assets/logo-updated.svg";
 
 const skills = [
   "Graphic Design", "Branding", "UI/UX Design", "Motion Design",
   "Pitch Decks", "Презентации", "Social Media Design", "Event Design",
   "Web Content", "Figma", "Adobe Creative Suite", "After Effects"
+];
+
+const languages = [
+  { flag: "🇰🇿", name: "Казахский", level: "родной" },
+  { flag: "🇷🇺", name: "Русский", level: "продвинутый" },
+  { flag: "🇬🇧", name: "Английский", level: "B1" },
 ];
 
 const Index = () => {
@@ -15,7 +21,7 @@ const Index = () => {
       <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-12 max-w-7xl mx-auto">
         <div className="space-y-8">
           {/* Logo visual */}
-          <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto mx-0 my-0 px-0 mr-[5px] mb-0 ml-0" />
+          <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto" />
 
           {/* Bio — casual tone */}
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed text-justify">
@@ -42,9 +48,9 @@ const Index = () => {
       </section>
 
       {/* About / Skills Section */}
-      <section className="px-6 md:px-12 py-20 max-w-7xl mx-auto">
+      <section className="px-6 md:px-12 pt-6 pb-20 max-w-7xl mx-auto">
         <h2 className="heading-display text-3xl md:text-5xl text-foreground mb-12">
-          кто я такой<span className="text-primary">?</span>
+          кто я такой<span className="text-primary">{"?"}</span>
         </h2>
 
         <div className="grid md:grid-cols-2 gap-16">
@@ -59,14 +65,23 @@ const Index = () => {
             </p>
           </div>
 
+          {/* Skills & Languages — visual cards */}
           <div className="space-y-8">
             <div>
-              <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">скиллы</h3>
+              <h3 className="text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-5">
+                <span>{"⚡"}</span> скиллы
+              </h3>
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill) => (
+                {skills.map((skill, i) => (
                   <span
                     key={skill}
-                    className="text-xs border border-border rounded-full px-4 py-2 text-muted-foreground hover:text-foreground hover:border-foreground transition-colors font-medium"
+                    className={`text-xs rounded-full px-4 py-2.5 font-semibold transition-all cursor-default ${
+                      i % 3 === 0
+                        ? "bg-foreground text-background"
+                        : i % 3 === 1
+                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : "bg-muted text-foreground"
+                    }`}
                   >
                     {skill}
                   </span>
@@ -75,12 +90,23 @@ const Index = () => {
             </div>
 
             <div>
-              <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">языки</h3>
-              <ul className="space-y-2 text-muted-foreground text-sm">
-                <li><span>{"🇰🇿"}</span> Казахский — родной</li>
-                <li><span>{"🇷🇺"}</span> Русский — продвинутый</li>
-                <li><span>{"🇬🇧"}</span> Английский — B1</li>
-              </ul>
+              <h3 className="text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-5">
+                <span>{"🌍"}</span> языки
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {languages.map((lang) => (
+                  <div
+                    key={lang.name}
+                    className="flex items-center gap-2.5 bg-muted rounded-full px-5 py-3"
+                  >
+                    <span className="text-lg">{lang.flag}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-foreground leading-tight">{lang.name}</span>
+                      <span className="text-xs text-muted-foreground leading-tight">{lang.level}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
