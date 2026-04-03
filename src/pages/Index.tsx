@@ -15,7 +15,7 @@ const Index = () => {
       <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-12 max-w-7xl mx-auto">
         <div className="space-y-8">
           {/* Logo visual */}
-          <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto" />
+          <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto mx-0 my-0 px-0 mr-[5px] mb-0 ml-0" />
 
           {/* Bio — casual tone */}
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
