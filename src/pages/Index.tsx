@@ -19,7 +19,7 @@ const Index = () => {
 
           {/* Bio — casual tone */}
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed text-justify">
-             и проекты это всё моё 🤙
+             и проекты это всё моё <span>{"🤙"}</span>
           </p>
 
           {/* CTA */}
@@ -55,7 +55,7 @@ const Index = () => {
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Люблю чистый дизайн, но не боюсь экспериментов. 
-              Главное — чтобы всё работало и выглядело 🔥
+              Главное — чтобы всё работало и выглядело <span>{"🔥"}</span>
             </p>
           </div>
 
@@ -77,9 +77,9 @@ const Index = () => {
             <div>
               <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mb-4">языки</h3>
               <ul className="space-y-2 text-muted-foreground text-sm">
-                <li>🇰🇿 Казахский — родной</li>
-                <li>🇷🇺 Русский — продвинутый</li>
-                <li>🇬🇧 Английский — B1</li>
+                <li><span>{"🇰🇿"}</span> Казахский — родной</li>
+                <li><span>{"🇷🇺"}</span> Русский — продвинутый</li>
+                <li><span>{"🇬🇧"}</span> Английский — B1</li>
               </ul>
             </div>
           </div>
