@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      project_images: {
+        Row: {
+          caption: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string
+          project_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url: string
+          project_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          link: string | null
+          short_description: string | null
+          title: string
+          tools: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          link?: string | null
+          short_description?: string | null
+          title: string
+          tools?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          link?: string | null
+          short_description?: string | null
+          title?: string
+          tools?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
