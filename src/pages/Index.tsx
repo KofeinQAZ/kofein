@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/logo-updated.png";
 
 const skills = [
   "Graphic Design", "Branding", "UI/UX Design", "Motion Design",
