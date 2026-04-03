@@ -18,11 +18,8 @@ const Index = () => {
           <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto mx-0 my-0 px-0 mr-[5px] mb-0 ml-0" />
 
           {/* Bio — casual tone */}
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            yo, я <span className="text-primary font-semibold">Creative Lead</span>, мне 18. 
-            Объединяю визуал, продуктовое мышление и управление командой. 
-            Делаю так, чтобы продукт был не просто красивым — а реально работал. 
-            Брендинг, <span className="text-primary font-semibold">no-code</span>, дизайн-системы — это всё моё 🤙
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed text-justify">
+             и проекты это всё моё 🤙
           </p>
 
           {/* CTA */}
