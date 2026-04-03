@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import logo from "@/assets/logo-updated.svg";
+import photo1 from "@/assets/photo-1.png";
+import photo2 from "@/assets/photo-2.png";
+import photo3 from "@/assets/photo-3.png";
 
 const skills = [
   "Graphic Design", "Branding", "UI/UX Design", "Motion Design",
@@ -19,13 +22,20 @@ const Index = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-12 max-w-7xl mx-auto">
-        <div className="space-y-8">
-          {/* Logo visual */}
-          <img src={logo} alt="Rasul Kapash" className="w-full max-w-xl md:max-w-2xl h-auto" />
+        <div className="space-y-6 md:space-y-8">
+          {/* Photos row */}
+          <div className="flex items-end gap-3 md:gap-5">
+            <img src={photo2} alt="Rasul speaking" className="w-24 h-28 md:w-36 md:h-44 object-cover rounded-2xl" />
+            <img src={photo3} alt="Rasul from behind" className="w-28 h-32 md:w-40 md:h-48 object-cover rounded-2xl" />
+            <img src={photo1} alt="Rasul with certificate" className="w-24 h-28 md:w-36 md:h-44 object-cover rounded-2xl" />
+          </div>
 
-          {/* Bio — casual tone */}
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed text-justify">
-             и проекты это всё моё <span>{"🤙"}</span>
+          {/* Logo visual */}
+          <img src={logo} alt="Rasul Kapash" className="w-full max-w-[90vw] md:max-w-2xl h-auto" />
+
+          {/* Bio */}
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
+            Графический дизайнер из Алматы. Брендинг, UI/UX, презентации и проекты — это всё моё <span>{"🤙"}</span>
           </p>
 
           {/* CTA */}
@@ -65,7 +75,7 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Skills & Languages — visual cards */}
+          {/* Skills & Languages */}
           <div className="space-y-8">
             <div>
               <h3 className="text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-5">
