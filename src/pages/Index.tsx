@@ -19,7 +19,7 @@ const Index = () => {
 
           {/* Bio — casual tone */}
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed text-justify">
-             и проекты это всё моё 🤙
+             и проекты это всё моё <span>{"🤙"}</span>
           </p>
 
           {/* CTA */}
