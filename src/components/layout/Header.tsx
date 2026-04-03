@@ -5,8 +5,7 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { to: "/", label: "Главная" },
   { to: "/portfolio", label: "Работы" },
-  { to: "/resume", label: "Резюме" },
-  { to: "/about", label: "Обо мне" },
+  { to: "#", label: "Резюме", external: true, href: "#" }, // placeholder URL
   { to: "/contacts", label: "Контакты" },
 ];
 
@@ -17,25 +16,37 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
-        <Link to="/" className="heading-display text-xl text-foreground hover:text-primary transition-colors">
+        <Link to="/" className="text-xl font-black tracking-tighter text-foreground hover:text-primary transition-colors uppercase" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           RK
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`text-sm tracking-wide transition-colors hover:text-primary ${
-                location.pathname === link.to
-                  ? "text-primary font-medium"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.external ? (
+              <a
+                key={link.label}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary text-muted-foreground"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary ${
+                  location.pathname === link.to
+                    ? "text-foreground"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         {/* Mobile burger */}
@@ -52,20 +63,33 @@ const Header = () => {
       {menuOpen && (
         <div className="md:hidden bg-background border-b border-border">
           <nav className="flex flex-col px-6 py-4 gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMenuOpen(false)}
-                className={`text-sm tracking-wide transition-colors hover:text-primary ${
-                  location.pathname === link.to
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary text-muted-foreground"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMenuOpen(false)}
+                  className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary ${
+                    location.pathname === link.to
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
           </nav>
         </div>
       )}

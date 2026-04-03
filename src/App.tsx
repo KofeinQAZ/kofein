@@ -7,8 +7,6 @@ import Layout from "@/components/layout/Layout";
 import Index from "./pages/Index";
 import Portfolio from "./pages/Portfolio";
 import ProjectDetail from "./pages/ProjectDetail";
-import Resume from "./pages/Resume";
-import About from "./pages/About";
 import Contacts from "./pages/Contacts";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
@@ -27,8 +25,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/portfolio/:id" element={<ProjectDetail />} />
-            <Route path="/resume" element={<Resume />} />
-            <Route path="/about" element={<About />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<Admin />} />
