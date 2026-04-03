@@ -55,7 +55,7 @@ const Index = () => {
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Люблю чистый дизайн, но не боюсь экспериментов. 
-              Главное — чтобы всё работало и выглядело 🔥
+              Главное — чтобы всё работало и выглядело <span>{"🔥"}</span>
             </p>
           </div>
 
