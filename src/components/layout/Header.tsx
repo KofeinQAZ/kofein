@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import logo from "@/assets/logo.svg";
 
 const navLinks = [
   { to: "/", label: "Главная" },
   { to: "/portfolio", label: "Работы" },
-  { to: "#", label: "Резюме", external: true, href: "#" }, // placeholder URL
+  { to: "#", label: "Резюме", external: true, href: "#" },
   { to: "/contacts", label: "Контакты" },
 ];
 
@@ -16,8 +17,8 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
-        <Link to="/" className="text-xl font-black tracking-tighter text-foreground hover:text-primary transition-colors uppercase" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          RK
+        <Link to="/" className="hover:opacity-80 transition-opacity">
+          <img src={logo} alt="Rasul Kapash" className="h-6 md:h-7 w-auto" />
         </Link>
 
         {/* Desktop nav */}
