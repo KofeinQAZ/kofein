@@ -24,9 +24,9 @@ const skills = [
 ];
 
 const languages = [
-  { flag: "🇰🇿", name: "Казахский", level: "Родной" },
-  { flag: "🇷🇺", name: "Русский", level: "Продвинутый" },
-  { flag: "🇬🇧", name: "Английский", level: "B1 - средний" },
+  { flag: flagKz, name: "Казахский", level: "Родной" },
+  { flag: flagRu, name: "Русский", level: "Продвинутый" },
+  { flag: flagGb, name: "Английский", level: "B1 - средний" },
 ];
 
 const Index = () => {
