@@ -153,7 +153,7 @@ const Index = () => {
               <div className="flex flex-wrap gap-6">
                 {languages.map((lang) => (
                   <div key={lang.name} className="flex items-center gap-2.5">
-                    <span className="text-2xl"><span>{lang.flag}</span></span>
+                    <img src={lang.flag} alt={lang.name} className="w-7 h-7 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-[10px] text-muted-foreground leading-tight">
                         {lang.level}
