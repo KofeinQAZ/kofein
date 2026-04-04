@@ -141,6 +141,7 @@ const ProjectForm = ({
   onClose: () => void;
   onSaved: () => void;
 }) => {
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState(project?.title || "");
   const [shortDescription, setShortDescription] = useState(project?.short_description || "");
   const [description, setDescription] = useState(project?.description || "");
@@ -152,6 +153,32 @@ const ProjectForm = ({
   const [saving, setSaving] = useState(false);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
 
+  // Fetch existing gallery images when editing
+  const { data: existingImages } = useQuery({
+    queryKey: ["admin-project-images", project?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_images")
+        .select("*")
+        .eq("project_id", project!.id)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!project?.id,
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async (imageId: string) => {
+      const { error } = await supabase.from("project_images").delete().eq("id", imageId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-project-images", project?.id] });
+      toast.success("Изображение удалено");
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -159,7 +186,6 @@ const ProjectForm = ({
     try {
       let coverUrl = project?.cover_image || null;
 
-      // Upload cover if new file selected
       if (coverFile) {
         const ext = coverFile.name.split(".").pop();
         const path = `covers/${Date.now()}.${ext}`;
@@ -331,9 +357,40 @@ const ProjectForm = ({
           </div>
         </div>
 
+        {/* Existing gallery images */}
+        {existingImages && existingImages.length > 0 && (
+          <div>
+            <label className="text-sm text-muted-foreground block mb-2">
+              Текущие изображения ({existingImages.length})
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {existingImages.map((img) => (
+                <div key={img.id} className="relative group">
+                  <img
+                    src={img.image_url}
+                    alt={img.caption || "Gallery"}
+                    className="w-24 h-24 object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm("Удалить это изображение?")) {
+                        deleteImageMutation.mutate(img.id);
+                      }
+                    }}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="text-sm text-muted-foreground block mb-1">
-            Изображения для галереи
+            Добавить изображения в галерею
           </label>
           <input
             type="file"
@@ -342,6 +399,11 @@ const ProjectForm = ({
             onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))}
             className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary file:text-primary-foreground"
           />
+          {galleryFiles.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Выбрано файлов: {galleryFiles.length}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-4 pt-4">

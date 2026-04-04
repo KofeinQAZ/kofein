@@ -67,10 +67,10 @@ const ProjectDetail = () => {
         Назад к работам
       </Link>
 
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="space-y-4">
-          <h1 className="heading-display text-4xl md:text-6xl text-foreground">
+      {/* Header: title left, description right */}
+      <div className="grid md:grid-cols-[1fr_2fr] gap-8 mb-12">
+        <div className="space-y-3">
+          <h1 className="heading-display text-3xl md:text-4xl text-foreground">
             {project.title}
           </h1>
           {project.category && (
@@ -78,84 +78,60 @@ const ProjectDetail = () => {
               {project.category}
             </p>
           )}
-        </div>
-
-        {/* Cover */}
-        {project.cover_image && (
-          <div className="rounded-lg overflow-hidden">
-            <img
-              src={project.cover_image}
-              alt={project.title}
-              className="w-full aspect-video object-cover"
-            />
-          </div>
-        )}
-
-        {/* Description */}
-        {project.description && (
-          <div className="max-w-3xl">
-            <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
-              {project.description}
-            </p>
-          </div>
-        )}
-
-        {/* Tools */}
-        {project.tools && project.tools.length > 0 && (
-          <div>
-            <h2 className="heading-display text-sm uppercase tracking-widest text-primary mb-4">
-              Инструменты
-            </h2>
-            <div className="flex flex-wrap gap-2">
+          {project.tools && project.tools.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
               {project.tools.map((tool) => (
                 <span
                   key={tool}
-                  className="text-sm border border-border rounded-full px-4 py-2 text-muted-foreground"
+                  className="text-xs border border-border rounded-full px-3 py-1.5 text-muted-foreground"
                 >
                   {tool}
                 </span>
               ))}
             </div>
+          )}
+          {project.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline mt-4"
+            >
+              Открыть проект <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+        {project.description && (
+          <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line pt-1">
+            {project.description}
+          </p>
+        )}
+      </div>
+
+      {/* Full-width images */}
+      <div className="space-y-4">
+        {project.cover_image && (
+          <div className="rounded-lg overflow-hidden">
+            <img
+              src={project.cover_image}
+              alt={project.title}
+              className="w-full object-cover"
+            />
           </div>
         )}
-
-        {/* Link */}
-        {project.link && (
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-primary hover:underline"
-          >
-            Открыть проект <ExternalLink size={16} />
-          </a>
-        )}
-
-        {/* Gallery */}
-        {images && images.length > 0 && (
-          <div>
-            <h2 className="heading-display text-sm uppercase tracking-widest text-primary mb-6">
-              Галерея
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {images.map((img) => (
-                <div key={img.id} className="rounded-lg overflow-hidden">
-                  <img
-                    src={img.image_url}
-                    alt={img.caption || project.title}
-                    className="w-full object-cover"
-                    loading="lazy"
-                  />
-                  {img.caption && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {img.caption}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
+        {images && images.map((img) => (
+          <div key={img.id} className="rounded-lg overflow-hidden">
+            <img
+              src={img.image_url}
+              alt={img.caption || project.title}
+              className="w-full object-cover"
+              loading="lazy"
+            />
+            {img.caption && (
+              <p className="text-sm text-muted-foreground mt-2">{img.caption}</p>
+            )}
           </div>
-        )}
+        ))}
       </div>
     </section>
   );
