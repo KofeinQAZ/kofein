@@ -4,6 +4,9 @@ import logo from "@/assets/logo-updated.svg";
 import photoSpeaking from "@/assets/photo-speaking.png";
 import photoCertificate from "@/assets/photo-certificate.png";
 import photoBack from "@/assets/photo-back.png";
+import flagKz from "@/assets/flag-kz.png";
+import flagRu from "@/assets/flag-ru.png";
+import flagGb from "@/assets/flag-gb.png";
 
 const skills = [
   { name: "Graphic Design", style: "dark" },
