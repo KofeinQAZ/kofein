@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/logo-updated.svg";
+import navbarIcon from "@/assets/navbar-icon.svg";
 
 const navLinks = [
   { to: "/", label: "Главная" },
@@ -18,7 +18,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
         <Link to="/" className="hover:opacity-80 transition-opacity">
-          <img src={logo} alt="Rasul Kapash" className="h-6 md:h-7 w-auto py-px my-[24px] mx-0 px-0" />
+          <img src={navbarIcon} alt="Rasul Kapash" className="h-7 md:h-8 w-auto" />
         </Link>
 
         {/* Desktop nav */}

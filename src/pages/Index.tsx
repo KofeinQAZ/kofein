@@ -1,58 +1,100 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import logo from "@/assets/logo-updated.svg";
-import photo1 from "@/assets/photo-1.png";
-import photo2 from "@/assets/photo-2.png";
-import photo3 from "@/assets/photo-3.png";
+import photoSpeaking from "@/assets/photo-speaking.png";
+import photoCertificate from "@/assets/photo-certificate.png";
+import photoBack from "@/assets/photo-back.png";
 
 const skills = [
-  "Graphic Design", "Branding", "UI/UX Design", "Motion Design",
-  "Pitch Decks", "Презентации", "Social Media Design", "Event Design",
-  "Web Content", "Figma", "Adobe Creative Suite", "After Effects"
+  { name: "Graphic Design", style: "dark" },
+  { name: "Branding", style: "primary" },
+  { name: "UI/UX Design", style: "light" },
+  { name: "Motion Design", style: "dark" },
+  { name: "Pitch Decks", style: "primary" },
+  { name: "Презентации", style: "light" },
+  { name: "Social Media Design", style: "dark" },
+  { name: "Event Design", style: "primary" },
+  { name: "Web Content", style: "light" },
+  { name: "Figma", style: "dark" },
+  { name: "Adobe Creative Suite", style: "primary" },
+  { name: "After Effects", style: "light" },
 ];
 
 const languages = [
-  { flag: "🇰🇿", name: "Казахский", level: "родной" },
-  { flag: "🇷🇺", name: "Русский", level: "продвинутый" },
-  { flag: "🇬🇧", name: "Английский", level: "B1" },
+  { flag: "🇰🇿", name: "Казахский", level: "Родной" },
+  { flag: "🇷🇺", name: "Русский", level: "Продвинутый" },
+  { flag: "🇬🇧", name: "Английский", level: "B1 - средний" },
 ];
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="min-h-[90vh] flex flex-col justify-center px-6 md:px-12 max-w-7xl mx-auto">
-        <div className="space-y-6 md:space-y-8">
-          {/* Photos row */}
-          <div className="flex items-end gap-3 md:gap-5">
-            <img src={photo2} alt="Rasul speaking" className="w-24 h-28 md:w-36 md:h-44 object-cover rounded-2xl" />
-            <img src={photo3} alt="Rasul from behind" className="w-28 h-32 md:w-40 md:h-48 object-cover rounded-2xl" />
-            <img src={photo1} alt="Rasul with certificate" className="w-24 h-28 md:w-36 md:h-44 object-cover rounded-2xl" />
+      <section className="min-h-[90vh] flex items-center px-6 md:px-12 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center w-full">
+          {/* Left column — typography + CTA */}
+          <div className="space-y-6">
+            {/* Big typographic block */}
+            <div className="space-y-0 leading-none">
+              <div className="flex items-start gap-3">
+                <span className="heading-display text-[clamp(3rem,8vw,6.5rem)] text-foreground leading-[0.9] tracking-tight font-black">
+                  RASUL
+                </span>
+                <div className="flex flex-col text-primary text-sm md:text-base font-medium mt-2 leading-snug">
+                  <span>vision</span>
+                  <span>design</span>
+                  <span>branding</span>
+                </div>
+              </div>
+              <div className="flex items-end gap-3">
+                <div className="flex flex-col text-primary text-sm md:text-base font-medium leading-snug mb-1">
+                  <span>media</span>
+                  <span>creativity</span>
+                  <span>leadership</span>
+                </div>
+                <span className="heading-display text-[clamp(3rem,8vw,6.5rem)] text-foreground leading-[0.9] tracking-[0.15em] font-black">
+                  KAPASH
+                </span>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <p className="text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
+              уо, я Creative Lead, мне 18. Объединяю визуал, продуктовое мышление и
+              управление командой. Делаю так, чтобы продукт был не просто красивым а
+              реально работал. Брендинг, no-code, проекты это всё моё <span>{"👍"}</span>
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/portfolio"
+                className="inline-flex items-center gap-3 bg-foreground text-background px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:opacity-90 transition-opacity group"
+              >
+                мои работы
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/contacts"
+                className="inline-flex items-center gap-3 border-2 border-foreground text-foreground px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:bg-foreground hover:text-background transition-colors"
+              >
+                написать мне
+              </Link>
+            </div>
           </div>
 
-          {/* Logo visual */}
-          <img src={logo} alt="Rasul Kapash" className="w-full max-w-[90vw] md:max-w-2xl h-auto" />
-
-          {/* Bio */}
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Графический дизайнер из Алматы. Брендинг, UI/UX, презентации и проекты — это всё моё <span>{"🤙"}</span>
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-wrap gap-4">
-            <Link
-              to="/portfolio"
-              className="inline-flex items-center gap-3 bg-foreground text-background px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:opacity-90 transition-opacity group"
-            >
-              мои работы
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              to="/contacts"
-              className="inline-flex items-center gap-3 border-2 border-foreground text-foreground px-8 py-4 rounded-full text-sm font-bold tracking-wide hover:bg-foreground hover:text-background transition-colors"
-            >
-              написать мне
-            </Link>
+          {/* Right column — photos */}
+          <div className="flex items-end justify-center gap-3 md:gap-4">
+            <img
+              src={photoSpeaking}
+              alt="Rasul speaking"
+              className="w-[40%] max-w-[220px] h-auto object-contain rounded-2xl"
+            />
+            <img
+              src={photoCertificate}
+              alt="Rasul with certificate"
+              className="w-[55%] max-w-[320px] h-auto object-contain rounded-2xl"
+            />
           </div>
         </div>
       </section>
@@ -65,54 +107,57 @@ const Index = () => {
 
         <div className="grid md:grid-cols-2 gap-16">
           <div className="space-y-6">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Графический дизайнер из Алматы. Делаю брендинг, дизайн-системы, 
-              презентации и UI/UX — для стартапов и образовательных проектов.
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+              Графический дизайнер из Алматы. Делаю брендинг, дизайн-системы,
+              презентации и UI/UX для стартапов и образовательных проектов.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Люблю чистый дизайн, но не боюсь экспериментов. 
-              Главное — чтобы всё работало и выглядело <span>{"🔥"}</span>
-            </p>
+            {/* Photo in about section */}
+            <img
+              src={photoBack}
+              alt="Rasul from behind"
+              className="w-56 md:w-64 h-auto object-contain mx-auto md:mx-0"
+            />
           </div>
 
           {/* Skills & Languages */}
-          <div className="space-y-8">
+          <div className="space-y-10">
             <div>
-              <h3 className="text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-5">
-                <span>{"⚡"}</span> скиллы
+              <h3 className="text-xs uppercase tracking-[0.25em] text-foreground font-bold mb-5">
+                СКИЛЛЫ
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {skills.map((skill, i) => (
+              <div className="flex flex-wrap gap-2.5">
+                {skills.map((skill) => (
                   <span
-                    key={skill}
-                    className={`text-xs rounded-full px-4 py-2.5 font-semibold transition-all cursor-default ${
-                      i % 3 === 0
+                    key={skill.name}
+                    className={`text-xs rounded-full px-5 py-2.5 font-medium cursor-default transition-all ${
+                      skill.style === "dark"
                         ? "bg-foreground text-background"
-                        : i % 3 === 1
-                        ? "bg-primary/10 text-primary border border-primary/20"
+                        : skill.style === "primary"
+                        ? "border border-primary text-primary"
                         : "bg-muted text-foreground"
                     }`}
                   >
-                    {skill}
+                    {skill.name}
                   </span>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-sm uppercase tracking-[0.2em] text-foreground font-bold mb-5">
-                <span>{"🌍"}</span> языки
+              <h3 className="text-xs uppercase tracking-[0.25em] text-foreground font-bold mb-5">
+                ЯЗЫКИ
               </h3>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-6">
                 {languages.map((lang) => (
-                  <div
-                    key={lang.name}
-                    className="flex items-center gap-2.5 bg-muted rounded-full px-5 py-3"
-                  >
-                    <span className="text-lg">{lang.flag}</span>
+                  <div key={lang.name} className="flex items-center gap-2.5">
+                    <span className="text-2xl"><span>{lang.flag}</span></span>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-foreground leading-tight">{lang.name}</span>
-                      <span className="text-xs text-muted-foreground leading-tight">{lang.level}</span>
+                      <span className="text-[10px] text-muted-foreground leading-tight">
+                        {lang.level}
+                      </span>
+                      <span className="text-sm font-semibold text-foreground leading-tight">
+                        {lang.name}
+                      </span>
                     </div>
                   </div>
                 ))}
