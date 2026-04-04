@@ -4,6 +4,9 @@ import logo from "@/assets/logo-updated.svg";
 import photoSpeaking from "@/assets/photo-speaking.png";
 import photoCertificate from "@/assets/photo-certificate.png";
 import photoBack from "@/assets/photo-back.png";
+import flagKz from "@/assets/flag-kz.png";
+import flagRu from "@/assets/flag-ru.png";
+import flagGb from "@/assets/flag-gb.png";
 
 const skills = [
   { name: "Graphic Design", style: "dark" },
@@ -21,9 +24,9 @@ const skills = [
 ];
 
 const languages = [
-  { flag: "🇰🇿", name: "Казахский", level: "Родной" },
-  { flag: "🇷🇺", name: "Русский", level: "Продвинутый" },
-  { flag: "🇬🇧", name: "Английский", level: "B1 - средний" },
+  { flag: flagKz, name: "Казахский", level: "Родной" },
+  { flag: flagRu, name: "Русский", level: "Продвинутый" },
+  { flag: flagGb, name: "Английский", level: "B1 - средний" },
 ];
 
 const Index = () => {
@@ -150,7 +153,7 @@ const Index = () => {
               <div className="flex flex-wrap gap-6">
                 {languages.map((lang) => (
                   <div key={lang.name} className="flex items-center gap-2.5">
-                    <span className="text-2xl"><span>{lang.flag}</span></span>
+                    <img src={lang.flag} alt={lang.name} className="w-7 h-7 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-[10px] text-muted-foreground leading-tight">
                         {lang.level}
