@@ -67,7 +67,7 @@ const Index = () => {
   return (
     <div className="min-h-screen overflow-hidden">
       {/* Hero Section */}
-      <section className="min-h-[90vh] flex items-center px-6 md:px-12 max-w-7xl mx-auto">
+      <section className="min-h-[90vh] flex items-center px-6 md:px-12 max-w-7xl mx-auto pt-12 md:pt-0">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center w-full">
           {/* Left column — typography + CTA */}
           <div className="space-y-6">
