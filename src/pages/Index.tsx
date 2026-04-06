@@ -170,6 +170,8 @@ const Index = () => {
               src={photoSpeaking}
               alt="Rasul speaking"
               className="w-[40%] max-w-[220px] h-auto object-contain rounded-2xl"
+              decoding="async"
+              fetchPriority="high"
               initial={{ opacity: 0, y: 40, rotate: -3 }}
               animate={{ opacity: 1, y: 0, rotate: 0 }}
               transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -179,6 +181,8 @@ const Index = () => {
               src={photoCertificate}
               alt="Rasul with certificate"
               className="w-[55%] max-w-[320px] h-auto object-contain rounded-2xl"
+              decoding="async"
+              fetchPriority="high"
               initial={{ opacity: 0, y: 50, rotate: 2 }}
               animate={{ opacity: 1, y: 0, rotate: 0 }}
               transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
