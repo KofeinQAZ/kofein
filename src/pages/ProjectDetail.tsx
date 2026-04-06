@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,17 +60,28 @@ const ProjectDetail = () => {
 
   return (
     <section className="min-h-[calc(100vh-4rem)] px-6 md:px-12 py-20 max-w-7xl mx-auto">
-      <Link
-        to="/portfolio"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-12"
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <ArrowLeft size={16} />
-        Назад к работам
-      </Link>
+        <Link
+          to="/portfolio"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-12"
+        >
+          <ArrowLeft size={16} />
+          Назад к работам
+        </Link>
+      </motion.div>
 
-      {/* Header: title left, description right */}
+      {/* Header */}
       <div className="grid md:grid-cols-[1fr_2fr] gap-8 mb-12">
-        <div className="space-y-3">
+        <motion.div
+          className="space-y-3"
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <h1 className="heading-display text-3xl md:text-4xl text-foreground">
             {project.title}
           </h1>
@@ -80,13 +92,16 @@ const ProjectDetail = () => {
           )}
           {project.tools && project.tools.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
-              {project.tools.map((tool) => (
-                <span
+              {project.tools.map((tool, i) => (
+                <motion.span
                   key={tool}
                   className="text-xs border border-border rounded-full px-3 py-1.5 text-muted-foreground"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.05 }}
                 >
                   {tool}
-                </span>
+                </motion.span>
               ))}
             </div>
           )}
@@ -100,27 +115,44 @@ const ProjectDetail = () => {
               Открыть проект <ExternalLink size={14} />
             </a>
           )}
-        </div>
+        </motion.div>
         {project.description && (
-          <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line pt-1">
+          <motion.p
+            className="text-base text-muted-foreground leading-relaxed whitespace-pre-line pt-1"
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             {project.description}
-          </p>
+          </motion.p>
         )}
       </div>
 
-      {/* Full-width images */}
+      {/* Images */}
       <div className="space-y-4">
         {project.cover_image && (
-          <div className="rounded-lg overflow-hidden">
+          <motion.div
+            className="rounded-lg overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+          >
             <img
               src={project.cover_image}
               alt={project.title}
               className="w-full object-cover"
             />
-          </div>
+          </motion.div>
         )}
-        {images && images.map((img) => (
-          <div key={img.id} className="rounded-lg overflow-hidden">
+        {images && images.map((img, i) => (
+          <motion.div
+            key={img.id}
+            className="rounded-lg overflow-hidden"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, delay: i * 0.1 }}
+          >
             <img
               src={img.image_url}
               alt={img.caption || project.title}
@@ -130,7 +162,7 @@ const ProjectDetail = () => {
             {img.caption && (
               <p className="text-sm text-muted-foreground mt-2">{img.caption}</p>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>
