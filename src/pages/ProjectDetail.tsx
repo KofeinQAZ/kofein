@@ -141,6 +141,8 @@ const ProjectDetail = () => {
               src={project.cover_image}
               alt={project.title}
               className="w-full object-cover"
+              decoding="async"
+              fetchPriority="high"
             />
           </motion.div>
         )}
