@@ -160,6 +160,7 @@ const ProjectDetail = () => {
               alt={img.caption || project.title}
               className="w-full object-cover"
               loading="lazy"
+              decoding="async"
             />
             {img.caption && (
               <p className="text-sm text-muted-foreground mt-2">{img.caption}</p>

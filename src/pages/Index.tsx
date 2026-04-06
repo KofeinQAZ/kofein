@@ -216,6 +216,8 @@ const Index = () => {
               src={photoBack}
               alt="Rasul from behind"
               className="w-56 md:w-64 h-auto object-contain mx-auto md:mx-0"
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-80px" }}

@@ -86,6 +86,7 @@ const Portfolio = () => {
                       alt={project.title}
                       className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="w-full aspect-[4/3] bg-muted flex items-center justify-center text-muted-foreground text-sm">
