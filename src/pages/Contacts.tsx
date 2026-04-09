@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const contactItems = [
   {
@@ -22,6 +25,30 @@ const contactItems = [
 ];
 
 const Contacts = () => {
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSending(true);
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const { error } = await supabase.from("contact_messages").insert({
+        name: formData.get("name") as string,
+        email: formData.get("email") as string,
+        subject: formData.get("subject") as string || null,
+        message: formData.get("message") as string,
+      });
+      if (error) throw error;
+      toast.success("Сообщение отправлено!");
+      e.currentTarget.reset();
+    } catch (err: any) {
+      toast.error("Ошибка отправки: " + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <section className="min-h-[calc(100vh-4rem)] px-6 md:px-12 py-20 max-w-7xl mx-auto">
       <motion.h1
@@ -81,18 +108,7 @@ const Contacts = () => {
 
         {/* Contact form */}
         <motion.form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const email = "kapasrasul@gmail.com";
-            const subject = encodeURIComponent(
-              `Сообщение от ${formData.get("name")}`
-            );
-            const body = encodeURIComponent(
-              `${formData.get("message")}\n\nОт: ${formData.get("name")}\nEmail: ${formData.get("email")}`
-            );
-            window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-          }}
+          onSubmit={handleSubmit}
           className="space-y-6"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -101,6 +117,7 @@ const Contacts = () => {
           {[
             { name: "name", label: "Имя", type: "text", placeholder: "Ваше имя", maxLength: 100 },
             { name: "email", label: "Email", type: "email", placeholder: "your@email.com", maxLength: 255 },
+            { name: "subject", label: "Тема", type: "text", placeholder: "Тема сообщения", maxLength: 200 },
           ].map((field, i) => (
             <motion.div
               key={field.name}
@@ -112,7 +129,7 @@ const Contacts = () => {
               <input
                 name={field.name}
                 type={field.type}
-                required
+                required={field.name !== "subject"}
                 maxLength={field.maxLength}
                 className="w-full bg-transparent border-b border-border py-3 text-foreground focus:outline-none focus:border-primary transition-colors"
                 placeholder={field.placeholder}
@@ -122,7 +139,7 @@ const Contacts = () => {
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
           >
             <label className="text-sm text-muted-foreground block mb-2">Сообщение</label>
             <textarea
@@ -136,14 +153,15 @@ const Contacts = () => {
           </motion.div>
           <motion.button
             type="submit"
-            className="bg-primary text-primary-foreground px-8 py-3 rounded-full text-sm font-medium tracking-wide hover:opacity-90 transition-opacity"
+            disabled={sending}
+            className="bg-primary text-primary-foreground px-8 py-3 rounded-full text-sm font-medium tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
           >
-            Отправить
+            {sending ? "Отправка..." : "Отправить"}
           </motion.button>
         </motion.form>
       </div>

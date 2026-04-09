@@ -4,6 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 
+const extractYoutubeId = (url: string): string | null => {
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\s]+)/
+  );
+  return match ? match[1] : null;
+};
+
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
 
@@ -26,6 +33,20 @@ const ProjectDetail = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("project_images")
+        .select("*")
+        .eq("project_id", id!)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: blocks } = useQuery({
+    queryKey: ["project-blocks", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_blocks")
         .select("*")
         .eq("project_id", id!)
         .order("display_order", { ascending: true });
@@ -127,6 +148,66 @@ const ProjectDetail = () => {
           </motion.p>
         )}
       </div>
+
+      {/* Content blocks */}
+      {blocks && blocks.length > 0 && (
+        <div className="space-y-8 mb-12">
+          {blocks.map((block, i) => (
+            <motion.div
+              key={block.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
+            >
+              {block.block_type === "heading" && (
+                <h2 className="heading-display text-2xl md:text-3xl text-foreground">
+                  {block.content}
+                </h2>
+              )}
+              {block.block_type === "paragraph" && (
+                <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {block.content}
+                </p>
+              )}
+              {block.block_type === "image" && block.image_url && (
+                <div className="rounded-lg overflow-hidden">
+                  <img
+                    src={block.image_url}
+                    alt={block.content || project.title}
+                    className="w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {block.content && (
+                    <p className="text-sm text-muted-foreground mt-2">{block.content}</p>
+                  )}
+                </div>
+              )}
+              {block.block_type === "youtube" && block.content && (() => {
+                const videoId = extractYoutubeId(block.content);
+                if (!videoId) return null;
+                return (
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title="YouTube video"
+                      className="w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                );
+              })()}
+              {block.block_type === "quote" && (
+                <blockquote className="border-l-4 border-primary pl-6 py-2 text-lg text-foreground italic">
+                  {block.content}
+                </blockquote>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Images */}
       <div className="space-y-4">

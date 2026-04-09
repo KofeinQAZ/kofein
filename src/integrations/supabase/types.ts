@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          name: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          name: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      project_blocks: {
+        Row: {
+          block_type: Database["public"]["Enums"]["block_type"]
+          content: string | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string | null
+          project_id: string
+        }
+        Insert: {
+          block_type: Database["public"]["Enums"]["block_type"]
+          content?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          project_id: string
+        }
+        Update: {
+          block_type?: Database["public"]["Enums"]["block_type"]
+          content?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_blocks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_images: {
         Row: {
           caption: string | null
@@ -99,7 +167,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      block_type: "heading" | "paragraph" | "image" | "youtube" | "quote"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -226,6 +294,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      block_type: ["heading", "paragraph", "image", "youtube", "quote"],
+    },
   },
 } as const
