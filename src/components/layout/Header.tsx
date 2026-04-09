@@ -7,7 +7,7 @@ import navbarIcon from "@/assets/navbar-icon.svg";
 const navLinks = [
   { to: "/", label: "Главная" },
   { to: "/portfolio", label: "Работы" },
-  { to: "#", label: "Резюме", external: true, href: "https://drive.google.com/file/d/1Kc7Z0H6x5-9eoE0fzdGUQ-xhf7I_eRxR/view?usp=sharing" },
+  { to: "#", label: "Резюме", external: true, href: "https://drive.google.com/file/d/18WDb51psQinuYIINGwOUg7XXS5eGpgbP/view?usp=sharing" },
   { to: "/contacts", label: "Контакты" },
 ];
 
