@@ -46,7 +46,7 @@ const Contacts = () => {
             любым удобным способом.
           </motion.p>
 
-          <div className="space-y-8">
+          <div className="flex flex-col gap-10">
             {contactItems.map((item, i) => {
               const Icon = item.icon;
               const content = (
@@ -57,12 +57,9 @@ const Contacts = () => {
                   transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
                   whileHover={{ x: 6, transition: { duration: 0.2 } }}
                 >
-                  <motion.div
-                    className="w-12 h-12 rounded-full border border-border flex items-center justify-center group-hover:border-primary transition-colors"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                  >
+                  <div className="w-12 h-12 rounded-full border border-border flex items-center justify-center group-hover:border-primary transition-colors flex-shrink-0">
                     <Icon size={18} />
-                  </motion.div>
+                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{item.label}</p>
                     <p className="font-medium">{item.value}</p>
@@ -72,12 +69,7 @@ const Contacts = () => {
 
               if (item.href) {
                 return (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    target={undefined}
-                    rel={undefined}
-                  >
+                  <a key={item.label} href={item.href}>
                     {content}
                   </a>
                 );
