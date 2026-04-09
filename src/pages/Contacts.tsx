@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 
 const contactItems = [
@@ -18,13 +18,6 @@ const contactItems = [
     icon: MapPin,
     label: "Локация",
     value: "Алматы, Казахстан",
-  },
-  {
-    icon: ExternalLink,
-    label: "Сайт",
-    value: "kofeingallery.framer.website",
-    href: "https://kofeingallery.framer.website",
-    external: true,
   },
 ];
 
@@ -53,7 +46,7 @@ const Contacts = () => {
             любым удобным способом.
           </motion.p>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {contactItems.map((item, i) => {
               const Icon = item.icon;
               const content = (
@@ -82,8 +75,8 @@ const Contacts = () => {
                   <a
                     key={item.label}
                     href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noopener noreferrer" : undefined}
+                    target={undefined}
+                    rel={undefined}
                   >
                     {content}
                   </a>
