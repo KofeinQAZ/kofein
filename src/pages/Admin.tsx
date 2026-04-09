@@ -3,9 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, LogOut, Image, X } from "lucide-react";
+import { Plus, Pencil, Trash2, LogOut, Image, Mail } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import ProjectForm from "@/components/admin/ProjectForm";
+import MessagesPanel from "@/components/admin/MessagesPanel";
 
 type Project = Tables<"projects">;
 
@@ -14,6 +16,7 @@ const Admin = () => {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<Project | null>(null);
   const [creating, setCreating] = useState(false);
+  const [tab, setTab] = useState<"projects" | "messages">("projects");
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ["admin-projects"],
@@ -21,9 +24,22 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .order("display_order", { ascending: true });
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
+    },
+    enabled: !!user,
+  });
+
+  const { data: unreadCount } = useQuery({
+    queryKey: ["admin-unread-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("contact_messages")
+        .select("*", { count: "exact", head: true })
+        .eq("is_read", false);
+      if (error) throw error;
+      return count || 0;
     },
     enabled: !!user,
   });
@@ -48,382 +64,123 @@ const Admin = () => {
 
   return (
     <section className="min-h-[calc(100vh-4rem)] px-6 md:px-12 py-20 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex items-center justify-between mb-8">
         <h1 className="heading-display text-3xl text-foreground">Админ-панель</h1>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => { setCreating(true); setEditing(null); }}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm hover:opacity-90 transition-opacity"
-          >
-            <Plus size={16} /> Добавить
-          </button>
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LogOut size={16} /> Выйти
-          </button>
-        </div>
-      </div>
-
-      {(creating || editing) && (
-        <ProjectForm
-          project={editing}
-          onClose={() => { setCreating(false); setEditing(null); }}
-          onSaved={() => {
-            setCreating(false);
-            setEditing(null);
-            queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
-          }}
-        />
-      )}
-
-      {isLoading ? (
-        <p className="text-muted-foreground">Загрузка...</p>
-      ) : (
-        <div className="space-y-4">
-          {projects?.map((project) => (
-            <div
-              key={project.id}
-              className="flex items-center gap-4 p-4 border border-border rounded-lg"
-            >
-              {project.cover_image ? (
-                <img
-                  src={project.cover_image}
-                  alt={project.title}
-                  className="w-16 h-16 rounded object-cover flex-shrink-0"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                  <Image size={20} className="text-muted-foreground" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground truncate">{project.title}</h3>
-                <p className="text-sm text-muted-foreground">{project.category}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => { setEditing(project); setCreating(false); }}
-                  className="p-2 text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm("Удалить проект?")) deleteMutation.mutate(project.id);
-                  }}
-                  className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-          {projects?.length === 0 && (
-            <p className="text-muted-foreground text-center py-8">
-              Нет проектов. Нажмите «Добавить» чтобы создать первый.
-            </p>
-          )}
-        </div>
-      )}
-    </section>
-  );
-};
-
-// Project form component
-const ProjectForm = ({
-  project,
-  onClose,
-  onSaved,
-}: {
-  project: Project | null;
-  onClose: () => void;
-  onSaved: () => void;
-}) => {
-  const queryClient = useQueryClient();
-  const [title, setTitle] = useState(project?.title || "");
-  const [shortDescription, setShortDescription] = useState(project?.short_description || "");
-  const [description, setDescription] = useState(project?.description || "");
-  const [category, setCategory] = useState(project?.category || "");
-  const [tools, setTools] = useState(project?.tools?.join(", ") || "");
-  const [link, setLink] = useState(project?.link || "");
-  const [displayOrder, setDisplayOrder] = useState(project?.display_order || 0);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
-
-  // Fetch existing gallery images when editing
-  const { data: existingImages } = useQuery({
-    queryKey: ["admin-project-images", project?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("project_images")
-        .select("*")
-        .eq("project_id", project!.id)
-        .order("display_order", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!project?.id,
-  });
-
-  const deleteImageMutation = useMutation({
-    mutationFn: async (imageId: string) => {
-      const { error } = await supabase.from("project_images").delete().eq("id", imageId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-project-images", project?.id] });
-      toast.success("Изображение удалено");
-    },
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
-    try {
-      let coverUrl = project?.cover_image || null;
-
-      if (coverFile) {
-        const ext = coverFile.name.split(".").pop();
-        const path = `covers/${Date.now()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from("project-images")
-          .upload(path, coverFile);
-        if (uploadError) throw uploadError;
-        const { data: urlData } = supabase.storage
-          .from("project-images")
-          .getPublicUrl(path);
-        coverUrl = urlData.publicUrl;
-      }
-
-      const projectData = {
-        title,
-        short_description: shortDescription || null,
-        description: description || null,
-        category: category || null,
-        cover_image: coverUrl,
-        tools: tools ? tools.split(",").map((t) => t.trim()) : [],
-        link: link || null,
-        display_order: displayOrder,
-      };
-
-      let projectId = project?.id;
-
-      if (project) {
-        const { error } = await supabase
-          .from("projects")
-          .update(projectData)
-          .eq("id", project.id);
-        if (error) throw error;
-      } else {
-        const { data, error } = await supabase
-          .from("projects")
-          .insert(projectData)
-          .select("id")
-          .single();
-        if (error) throw error;
-        projectId = data.id;
-      }
-
-      // Upload gallery images
-      if (galleryFiles.length > 0 && projectId) {
-        for (const file of galleryFiles) {
-          const ext = file.name.split(".").pop();
-          const path = `gallery/${projectId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-          const { error: uploadError } = await supabase.storage
-            .from("project-images")
-            .upload(path, file);
-          if (uploadError) throw uploadError;
-          const { data: urlData } = supabase.storage
-            .from("project-images")
-            .getPublicUrl(path);
-
-          await supabase.from("project_images").insert({
-            project_id: projectId,
-            image_url: urlData.publicUrl,
-          });
-        }
-      }
-
-      toast.success(project ? "Проект обновлён" : "Проект создан");
-      onSaved();
-    } catch (err: any) {
-      toast.error("Ошибка: " + err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="mb-12 border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="heading-display text-xl text-foreground">
-          {project ? "Редактировать проект" : "Новый проект"}
-        </h2>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-          <X size={20} />
+        <button
+          onClick={handleLogout}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <LogOut size={16} /> Выйти
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">Название *</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              maxLength={200}
-              className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">Категория</label>
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              maxLength={100}
-              className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-              placeholder="Branding, UI/UX, etc."
-            />
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center gap-6 mb-8 border-b border-border">
+        <button
+          onClick={() => setTab("projects")}
+          className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
+            tab === "projects"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Проекты
+        </button>
+        <button
+          onClick={() => setTab("messages")}
+          className={`pb-3 text-sm font-medium transition-colors border-b-2 inline-flex items-center gap-2 ${
+            tab === "messages"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Mail size={14} />
+          Сообщения
+          {(unreadCount ?? 0) > 0 && (
+            <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
 
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Краткое описание</label>
-          <input
-            value={shortDescription}
-            onChange={(e) => setShortDescription(e.target.value)}
-            maxLength={300}
-            className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-          />
-        </div>
+      {tab === "messages" && <MessagesPanel />}
 
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">Полное описание</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={5}
-            className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary resize-none"
-          />
-        </div>
+      {tab === "projects" && (
+        <>
+          <div className="flex items-center justify-end mb-6">
+            <button
+              onClick={() => { setCreating(true); setEditing(null); }}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm hover:opacity-90 transition-opacity"
+            >
+              <Plus size={16} /> Добавить
+            </button>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">
-              Инструменты (через запятую)
-            </label>
-            <input
-              value={tools}
-              onChange={(e) => setTools(e.target.value)}
-              className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-              placeholder="Figma, Photoshop, After Effects"
+          {(creating || editing) && (
+            <ProjectForm
+              project={editing}
+              onClose={() => { setCreating(false); setEditing(null); }}
+              onSaved={() => {
+                setCreating(false);
+                setEditing(null);
+                queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
+              }}
             />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">Ссылка</label>
-            <input
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              type="url"
-              className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-              placeholder="https://..."
-            />
-          </div>
-        </div>
+          )}
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">Обложка</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-              className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary file:text-primary-foreground"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground block mb-1">Порядок</label>
-            <input
-              type="number"
-              value={displayOrder}
-              onChange={(e) => setDisplayOrder(Number(e.target.value))}
-              className="w-full bg-transparent border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:border-primary"
-            />
-          </div>
-        </div>
-
-        {/* Existing gallery images */}
-        {existingImages && existingImages.length > 0 && (
-          <div>
-            <label className="text-sm text-muted-foreground block mb-2">
-              Текущие изображения ({existingImages.length})
-            </label>
-            <div className="flex flex-wrap gap-3">
-              {existingImages.map((img) => (
-                <div key={img.id} className="relative group">
-                  <img
-                    src={img.image_url}
-                    alt={img.caption || "Gallery"}
-                    className="w-24 h-24 object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm("Удалить это изображение?")) {
-                        deleteImageMutation.mutate(img.id);
-                      }
-                    }}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X size={12} />
-                  </button>
+          {isLoading ? (
+            <p className="text-muted-foreground">Загрузка...</p>
+          ) : (
+            <div className="space-y-4">
+              {projects?.map((project) => (
+                <div
+                  key={project.id}
+                  className="flex items-center gap-4 p-4 border border-border rounded-lg"
+                >
+                  {project.cover_image ? (
+                    <img
+                      src={project.cover_image}
+                      alt={project.title}
+                      className="w-16 h-16 rounded object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                      <Image size={20} className="text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">{project.title}</h3>
+                    <p className="text-sm text-muted-foreground">{project.category}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { setEditing(project); setCreating(false); }}
+                      className="p-2 text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm("Удалить проект?")) deleteMutation.mutate(project.id);
+                      }}
+                      className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
+              {projects?.length === 0 && (
+                <p className="text-muted-foreground text-center py-8">
+                  Нет проектов. Нажмите «Добавить» чтобы создать первый.
+                </p>
+              )}
             </div>
-          </div>
-        )}
-
-        <div>
-          <label className="text-sm text-muted-foreground block mb-1">
-            Добавить изображения в галерею
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => setGalleryFiles(Array.from(e.target.files || []))}
-            className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary file:text-primary-foreground"
-          />
-          {galleryFiles.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Выбрано файлов: {galleryFiles.length}
-            </p>
           )}
-        </div>
-
-        <div className="flex gap-4 pt-4">
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-primary text-primary-foreground px-6 py-2 rounded-full text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {saving ? "Сохранение..." : project ? "Сохранить" : "Создать"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-6 py-2 rounded-full text-sm border border-border text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Отмена
-          </button>
-        </div>
-      </form>
-    </div>
+        </>
+      )}
+    </section>
   );
 };
 
