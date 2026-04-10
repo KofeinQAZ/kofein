@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import RichTextEditor from "./RichTextEditor";
 
 type BlockType = "heading" | "paragraph" | "image" | "youtube" | "quote";
 
@@ -208,12 +209,10 @@ const BlockEditor = ({ projectId }: { projectId: string }) => {
           )}
 
           {block.block_type === "paragraph" && (
-            <textarea
+            <RichTextEditor
               value={block.content}
-              onChange={(e) => updateBlock(index, "content", e.target.value)}
-              placeholder="Текст параграфа... Поддерживает **жирный**, *курсив*, > цитаты"
-              rows={4}
-              className="w-full bg-transparent border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary resize-none"
+              onChange={(val) => updateBlock(index, "content", val)}
+              placeholder="Начните писать текст..."
             />
           )}
 
