@@ -124,8 +124,11 @@ const ProjectForm = ({
         }
       }
 
-      toast.success(project ? "Проект обновлён" : "Проект создан");
-      onSaved();
+      toast.success(project ? "Проект обновлён" : "Проект создан. Теперь можно добавить блоки контента.");
+      if (project) {
+        onSaved();
+      }
+      // For new projects, keep form open so user can add blocks
     } catch (err: any) {
       toast.error("Ошибка: " + err.message);
     } finally {
