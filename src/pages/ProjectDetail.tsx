@@ -165,10 +165,11 @@ const ProjectDetail = () => {
                   {block.content}
                 </h2>
               )}
-              {block.block_type === "paragraph" && (
-                <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
-                  {block.content}
-                </p>
+              {block.block_type === "paragraph" && block.content && (
+                <div
+                  className="text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:text-foreground [&_b]:text-foreground"
+                  dangerouslySetInnerHTML={{ __html: block.content }}
+                />
               )}
               {block.block_type === "image" && block.image_url && (
                 <div className="rounded-lg overflow-hidden">
