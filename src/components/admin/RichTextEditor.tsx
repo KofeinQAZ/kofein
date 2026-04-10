@@ -8,17 +8,17 @@ interface RichTextEditorProps {
 }
 
 const ToolbarButton = ({
-  onClick,
+  onMouseDown,
   title,
   children,
 }: {
-  onClick: () => void;
+  onMouseDown: (e: React.MouseEvent) => void;
   title: string;
   children: React.ReactNode;
 }) => (
   <button
     type="button"
-    onClick={onClick}
+    onMouseDown={onMouseDown}
     title={title}
     className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
   >
@@ -46,62 +46,59 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
     }
   }, [onChange]);
 
-  const execCommand = (command: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, value);
+  const execCommand = (e: React.MouseEvent, command: string, val?: string) => {
+    e.preventDefault(); // prevent blur / selection loss
+    document.execCommand(command, false, val);
     handleInput();
   };
 
-  const handleBold = () => execCommand("bold");
-  const handleItalic = () => execCommand("italic");
-  const handleUndo = () => execCommand("undo");
-  const handleRedo = () => execCommand("redo");
-  const handleUL = () => execCommand("insertUnorderedList");
-  const handleOL = () => execCommand("insertOrderedList");
-
-  const handleLink = () => {
+  const handleLink = (e: React.MouseEvent) => {
+    e.preventDefault();
     const url = prompt("Введите URL:");
     if (url) {
-      execCommand("createLink", url);
+      document.execCommand("createLink", false, url);
+      handleInput();
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "b" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleBold();
+      document.execCommand("bold");
+      handleInput();
     }
     if (e.key === "i" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleItalic();
+      document.execCommand("italic");
+      handleInput();
     }
   };
 
   return (
     <div className="border border-border rounded-lg overflow-hidden focus-within:border-primary transition-colors">
       <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border bg-muted/30">
-        <ToolbarButton onClick={handleBold} title="Жирный (Ctrl+B)">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "bold")} title="Жирный (Ctrl+B)">
           <Bold size={14} />
         </ToolbarButton>
-        <ToolbarButton onClick={handleItalic} title="Курсив (Ctrl+I)">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "italic")} title="Курсив (Ctrl+I)">
           <Italic size={14} />
         </ToolbarButton>
         <div className="w-px h-4 bg-border mx-1" />
-        <ToolbarButton onClick={handleLink} title="Ссылка">
+        <ToolbarButton onMouseDown={handleLink} title="Ссылка">
           <Link size={14} />
         </ToolbarButton>
         <div className="w-px h-4 bg-border mx-1" />
-        <ToolbarButton onClick={handleUL} title="Маркированный список">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "insertUnorderedList")} title="Маркированный список">
           <List size={14} />
         </ToolbarButton>
-        <ToolbarButton onClick={handleOL} title="Нумерованный список">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "insertOrderedList")} title="Нумерованный список">
           <ListOrdered size={14} />
         </ToolbarButton>
         <div className="w-px h-4 bg-border mx-1" />
-        <ToolbarButton onClick={handleUndo} title="Отменить">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "undo")} title="Отменить">
           <Undo size={14} />
         </ToolbarButton>
-        <ToolbarButton onClick={handleRedo} title="Повторить">
+        <ToolbarButton onMouseDown={(e) => execCommand(e, "redo")} title="Повторить">
           <Redo size={14} />
         </ToolbarButton>
       </div>
