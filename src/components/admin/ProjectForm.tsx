@@ -84,6 +84,7 @@ const ProjectForm = ({
         cover_image: coverUrl,
         tools: tools ? tools.split(",").map((t) => t.trim()) : [],
         link: link || null,
+        is_featured: isFeatured,
       };
 
       let projectId = project?.id;
