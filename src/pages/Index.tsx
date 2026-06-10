@@ -8,6 +8,7 @@ import photoBack from "@/assets/photo-back.png";
 import flagKz from "@/assets/flag-kz.png";
 import flagRu from "@/assets/flag-ru.png";
 import flagGb from "@/assets/flag-gb.png";
+import FeaturedProjectsScroll from "@/components/home/FeaturedProjectsScroll";
 
 const skills = [
   { name: "Graphic Design", style: "dark" },
@@ -191,6 +192,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Featured projects — scroll-driven */}
+      <FeaturedProjectsScroll />
 
       {/* About / Skills Section */}
       <section className="px-6 md:px-12 pt-6 pb-20 max-w-7xl mx-auto">

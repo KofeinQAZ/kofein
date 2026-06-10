@@ -24,6 +24,7 @@ const ProjectForm = ({
   const [category, setCategory] = useState(project?.category || "");
   const [tools, setTools] = useState(project?.tools?.join(", ") || "");
   const [link, setLink] = useState(project?.link || "");
+  const [isFeatured, setIsFeatured] = useState<boolean>((project as any)?.is_featured ?? false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
@@ -83,6 +84,7 @@ const ProjectForm = ({
         cover_image: coverUrl,
         tools: tools ? tools.split(",").map((t) => t.trim()) : [],
         link: link || null,
+        is_featured: isFeatured,
       };
 
       let projectId = project?.id;
@@ -224,6 +226,21 @@ const ProjectForm = ({
             className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-primary file:text-primary-foreground"
           />
         </div>
+
+        <label className="flex items-center gap-3 cursor-pointer select-none p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            className="w-5 h-5 accent-primary"
+          />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-foreground">⭐ Избранный проект</div>
+            <div className="text-xs text-muted-foreground">
+              Будет показан в анимированной секции на главной странице
+            </div>
+          </div>
+        </label>
 
         {existingImages && existingImages.length > 0 && (
           <div>

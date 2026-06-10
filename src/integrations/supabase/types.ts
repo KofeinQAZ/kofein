@@ -125,6 +125,7 @@ export type Database = {
           description: string | null
           display_order: number | null
           id: string
+          is_featured: boolean
           link: string | null
           short_description: string | null
           title: string
@@ -138,6 +139,7 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           id?: string
+          is_featured?: boolean
           link?: string | null
           short_description?: string | null
           title: string
@@ -151,6 +153,7 @@ export type Database = {
           description?: string | null
           display_order?: number | null
           id?: string
+          is_featured?: boolean
           link?: string | null
           short_description?: string | null
           title?: string
