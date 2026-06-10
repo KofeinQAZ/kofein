@@ -24,6 +24,7 @@ const ProjectForm = ({
   const [category, setCategory] = useState(project?.category || "");
   const [tools, setTools] = useState(project?.tools?.join(", ") || "");
   const [link, setLink] = useState(project?.link || "");
+  const [isFeatured, setIsFeatured] = useState<boolean>((project as any)?.is_featured ?? false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
