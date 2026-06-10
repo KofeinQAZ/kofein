@@ -8,6 +8,7 @@ import photoBack from "@/assets/photo-back.png";
 import flagKz from "@/assets/flag-kz.png";
 import flagRu from "@/assets/flag-ru.png";
 import flagGb from "@/assets/flag-gb.png";
+import FeaturedProjectsScroll from "@/components/home/FeaturedProjectsScroll";
 
 const skills = [
   { name: "Graphic Design", style: "dark" },
