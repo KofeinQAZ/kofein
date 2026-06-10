@@ -104,6 +104,23 @@ const BackgroundBlob = ({ progress }: { progress: MotionValue<number> }) => {
   );
 };
 
+const ProgressDot = ({
+  progress,
+  index,
+  count,
+}: {
+  progress: MotionValue<number>;
+  index: number;
+  count: number;
+}) => {
+  const opacity = useTransform(
+    progress,
+    [index / count - 0.05, index / count, (index + 1) / count, (index + 1) / count + 0.05],
+    [0.3, 1, 1, 0.3]
+  );
+  return <motion.div style={{ opacity }} className="w-8 h-0.5 bg-foreground" />;
+};
+
 const ProgressIndicator = ({
   progress,
   count,
@@ -113,20 +130,9 @@ const ProgressIndicator = ({
 }) => {
   return (
     <div className="flex flex-col gap-1.5">
-      {Array.from({ length: count }).map((_, i) => {
-        const opacity = useTransform(
-          progress,
-          [i / count - 0.05, i / count, (i + 1) / count, (i + 1) / count + 0.05],
-          [0.3, 1, 1, 0.3]
-        );
-        return (
-          <motion.div
-            key={i}
-            style={{ opacity }}
-            className="w-8 h-0.5 bg-foreground"
-          />
-        );
-      })}
+      {Array.from({ length: count }).map((_, i) => (
+        <ProgressDot key={i} progress={progress} index={i} count={count} />
+      ))}
     </div>
   );
 };
