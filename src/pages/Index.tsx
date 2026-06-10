@@ -193,6 +193,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Featured projects — scroll-driven */}
+      <FeaturedProjectsScroll />
+
       {/* About / Skills Section */}
       <section className="px-6 md:px-12 pt-6 pb-20 max-w-7xl mx-auto">
         <motion.h2
