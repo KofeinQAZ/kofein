@@ -227,6 +227,21 @@ const ProjectForm = ({
           />
         </div>
 
+        <label className="flex items-center gap-3 cursor-pointer select-none p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            className="w-5 h-5 accent-primary"
+          />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-foreground">⭐ Избранный проект</div>
+            <div className="text-xs text-muted-foreground">
+              Будет показан в анимированной секции на главной странице
+            </div>
+          </div>
+        </label>
+
         {existingImages && existingImages.length > 0 && (
           <div>
             <label className="text-sm text-muted-foreground block mb-2">
