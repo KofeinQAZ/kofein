@@ -17,26 +17,32 @@ const Header = () => {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border"
+      className="fixed top-0 left-0 right-0 z-50 pt-6 px-6 md:px-12 pointer-events-none"
       initial={{ y: -64 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
-        <Link to="/" className="hover:opacity-80 transition-opacity">
+      <div className="max-w-7xl mx-auto flex items-center justify-between relative">
+        
+        {/* Логотип (слева) */}
+        <Link to="/" className="pointer-events-auto hover:opacity-80 transition-opacity z-10 flex-shrink-0">
           <img src={navbarIcon} alt="Rasul Kapash" className="h-7 md:h-8 w-auto" />
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link, i) =>
-            link.external ? (
+        {/* Десктопное меню (центрированная "таблетка") */}
+        <nav className="hidden md:flex items-center gap-1 bg-white px-2 py-1.5 rounded-full shadow-lg pointer-events-auto absolute left-1/2 transform -translate-x-1/2">
+          {navLinks.map((link, i) => {
+            const isActive = location.pathname === link.to;
+            const baseClass = "text-sm font-medium px-4 py-2 rounded-full transition-all duration-200";
+            const activeClass = isActive ? "bg-gray-100 text-black" : "text-gray-600 hover:text-black hover:bg-gray-50";
+
+            return link.external ? (
               <motion.a
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary text-muted-foreground py-0 mt-[4px] my-[3px]"
+                className={`${baseClass} text-gray-600 hover:text-black hover:bg-gray-50`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.08 }}
@@ -50,24 +56,17 @@ const Header = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.08 }}
               >
-                <Link
-                  to={link.to}
-                  className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary ${
-                    location.pathname === link.to
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
-                >
+                <Link to={link.to} className={`${baseClass} ${activeClass}`}>
                   {link.label}
                 </Link>
               </motion.div>
-            )
-          )}
+            );
+          })}
         </nav>
 
-        {/* Mobile burger */}
+        {/* Бургер для мобилок (справа) */}
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-lg z-50 relative flex-shrink-0"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -80,7 +79,7 @@ const Header = () => {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X size={24} />
+                <X size={20} />
               </motion.div>
             ) : (
               <motion.div
@@ -90,33 +89,37 @@ const Header = () => {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Menu size={24} />
+                <Menu size={20} />
               </motion.div>
             )}
           </AnimatePresence>
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Выпадающее мобильное меню (парящая карточка) */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="md:hidden bg-background border-b border-border overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            className="md:hidden absolute top-20 right-6 left-6 bg-white rounded-2xl shadow-2xl overflow-hidden pointer-events-auto border border-gray-100"
+            initial={{ height: 0, opacity: 0, y: -10 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -10 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <nav className="flex flex-col px-6 py-4 gap-4">
-              {navLinks.map((link, i) =>
-                link.external ? (
+            <nav className="flex flex-col p-4 gap-2">
+              {navLinks.map((link, i) => {
+                const isActive = location.pathname === link.to;
+                const baseMobileClass = "text-sm font-medium px-4 py-3 rounded-xl transition-colors";
+                const activeMobileClass = isActive ? "bg-gray-100 text-black" : "text-gray-600 hover:text-black hover:bg-gray-50";
+
+                return link.external ? (
                   <motion.a
                     key={link.label}
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMenuOpen(false)}
-                    className="text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary text-muted-foreground"
+                    className={`${baseMobileClass} text-gray-600 hover:text-black hover:bg-gray-50`}
                     initial={{ opacity: 0, x: -15 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.06 }}
@@ -133,17 +136,13 @@ const Header = () => {
                     <Link
                       to={link.to}
                       onClick={() => setMenuOpen(false)}
-                      className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors hover:text-primary ${
-                        location.pathname === link.to
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
+                      className={`block ${baseMobileClass} ${activeMobileClass}`}
                     >
                       {link.label}
                     </Link>
                   </motion.div>
-                )
-              )}
+                );
+              })}
             </nav>
           </motion.div>
         )}
