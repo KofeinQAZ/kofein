@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -12,6 +12,16 @@ import { ArrowUpRight, ChevronDown } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
+
+/** Accent palette cycled per project (hue, rgb for glow) */
+const ACCENTS = [
+  { name: "blue",   hue: "210 100% 65%", rgb: "92, 160, 255" },
+  { name: "amber",  hue: "32 100% 60%",  rgb: "255, 160, 60" },
+  { name: "teal",   hue: "168 80% 55%",  rgb: "60, 220, 200" },
+  { name: "violet", hue: "270 90% 70%",  rgb: "180, 130, 255" },
+  { name: "rose",   hue: "340 90% 65%",  rgb: "255, 110, 160" },
+  { name: "lime",   hue: "90 80% 60%",   rgb: "180, 240, 90" },
+];
 
 const FeaturedProjectsScroll = () => {
   const { data: projects, isLoading } = useQuery({
@@ -37,7 +47,6 @@ const FeaturedProjectsScroll = () => {
   if (!projects || projects.length === 0) return null;
 
   const count = projects.length;
-  // Each project = 1 full viewport of scroll (acts like a slider step)
   const sectionHeight = `${count * 100}vh`;
 
   return (
@@ -46,25 +55,24 @@ const FeaturedProjectsScroll = () => {
       className="relative bg-black text-white"
       style={{ height: sectionHeight }}
     >
-      {/* Sticky stage that pins while we scroll through all projects */}
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* Layered parallax backgrounds (one per project) */}
+        {/* Parallax tunnel backgrounds — one per project, crossfaded */}
         {projects.map((project, i) => (
-          <ProjectBackdrop
+          <TunnelBackdrop
             key={project.id}
-            project={project}
             index={i}
             count={count}
             progress={scrollYProgress}
+            accent={ACCENTS[i % ACCENTS.length]}
           />
         ))}
 
         {/* Top progress + counter */}
-        <div className="absolute top-0 inset-x-0 z-30 pt-6 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto flex items-start justify-between gap-6">
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/60 font-mono">
+        <div className="absolute top-0 inset-x-0 z-30 pt-5 px-4 sm:px-6 md:px-12">
+          <div className="max-w-7xl mx-auto flex items-start justify-between gap-3 sm:gap-6">
+            <div className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white/60 font-mono">
               / {String(count).padStart(2, "0")} · WORK
-              <div className="text-white/40 mt-1 text-[10px]">SELECTED PROJECTS</div>
+              <div className="text-white/40 mt-1 hidden sm:block">SELECTED PROJECTS</div>
             </div>
             <SegmentedProgress progress={scrollYProgress} count={count} />
             <CounterDisplay progress={scrollYProgress} count={count} />
@@ -80,20 +88,21 @@ const FeaturedProjectsScroll = () => {
               index={i}
               count={count}
               progress={scrollYProgress}
+              accent={ACCENTS[i % ACCENTS.length]}
             />
           ))}
         </div>
 
         {/* Bottom hint */}
-        <div className="absolute bottom-6 inset-x-0 z-30 flex flex-col items-center gap-1 pointer-events-none">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-white/50">
-            SCROLL
+        <div className="absolute bottom-5 inset-x-0 z-30 flex flex-col items-center gap-1 pointer-events-none">
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.35em] sm:tracking-[0.4em] text-white/50">
+            DRIVE INTO THE TUNNEL
           </p>
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 1.8, repeat: Infinity }}
           >
-            <ChevronDown size={16} className="text-white/50" />
+            <ChevronDown size={14} className="text-white/50" />
           </motion.div>
         </div>
       </div>
@@ -102,23 +111,23 @@ const FeaturedProjectsScroll = () => {
 };
 
 /* ============================================================
-   PROJECT BACKDROP — parallax zoom-in cover image per project
+   TUNNEL BACKDROP — vertical light bars in perspective,
+   particles, vanishing-point glow. Parallax-zooms with scroll.
    ============================================================ */
-const ProjectBackdrop = ({
-  project,
+const TunnelBackdrop = ({
   index,
   count,
   progress,
+  accent,
 }: {
-  project: Project;
   index: number;
   count: number;
   progress: MotionValue<number>;
+  accent: { hue: string; rgb: string };
 }) => {
   const start = index / count;
   const end = (index + 1) / count;
-  // Tight crossfade right at the boundary so only one image is visible at a time
-  const cf = 0.04 / count; // ~4% of one segment
+  const cf = 0.04 / count;
   const fadeIn = Math.max(0, start - cf);
   const fadeOut = Math.min(1, end + cf);
 
@@ -128,34 +137,155 @@ const ProjectBackdrop = ({
     [0, 1, 1, 0]
   );
 
-  // Strong parallax zoom: bg "approaches" the viewer through the whole segment
-  const scale = useTransform(progress, [start, end], [1.05, 1.5]);
-  const y = useTransform(progress, [start, end], ["3%", "-6%"]);
+  // "Drive into the tunnel": bars stretch and zoom toward camera
+  const scale = useTransform(progress, [start, end], [1, 1.6]);
+  const barStretchY = useTransform(progress, [start, end], [1, 1.25]);
+  const glowScale = useTransform(progress, [start, end], [0.8, 1.8]);
+  const glowOpacity = useTransform(progress, [start, end], [0.45, 0.9]);
+
+  // Deterministic bar positions (so it stays stable, not random per render)
+  const bars = useMemo(() => {
+    const arr: { left: number; height: number; opacity: number; delay: number }[] = [];
+    const seed = index * 13 + 7;
+    for (let i = 0; i < 22; i++) {
+      const t = (i + 1) / 23;
+      // Distribute bars away from center (vanishing point)
+      const offset = (t - 0.5) * 100;
+      arr.push({
+        left: 50 + offset,
+        height: 45 + ((i * 17 + seed) % 45),
+        opacity: 0.25 + ((i * 11) % 60) / 100,
+        delay: (i * 0.07) % 1.4,
+      });
+    }
+    return arr;
+  }, [index]);
+
+  const particles = useMemo(() => {
+    const arr: { left: number; top: number; size: number; delay: number; duration: number }[] = [];
+    const seed = index * 31 + 3;
+    for (let i = 0; i < 28; i++) {
+      arr.push({
+        left: ((i * 53 + seed) % 100),
+        top: ((i * 37 + seed * 2) % 80) + 10,
+        size: 1 + ((i + seed) % 3),
+        delay: ((i * 0.13) % 2),
+        duration: 2.5 + ((i * 0.31) % 2.5),
+      });
+    }
+    return arr;
+  }, [index]);
 
   return (
     <motion.div
       style={{ opacity }}
       className="absolute inset-0 will-change-[opacity]"
     >
-      {project.cover_image ? (
-        <motion.div
-          style={{ scale, y }}
-          className="absolute inset-0 will-change-transform"
+      {/* Base gradient — darker than pure black for depth */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(ellipse at 50% 55%, hsl(${accent.hue} / 0.18), #000 65%)`,
+        }}
+      />
+
+      {/* Tunnel — zooms with scroll */}
+      <motion.div
+        style={{ scale }}
+        className="absolute inset-0 will-change-transform"
+      >
+        {/* Vertical light bars */}
+        <div className="absolute inset-0">
+          {bars.map((b, i) => (
+            <motion.div
+              key={i}
+              style={{
+                left: `${b.left}%`,
+                top: `${50 - b.height / 2}%`,
+                height: `${b.height}%`,
+                opacity: b.opacity,
+                background: `linear-gradient(to bottom, transparent, rgba(${accent.rgb}, 0.9), transparent)`,
+                boxShadow: `0 0 12px rgba(${accent.rgb}, 0.6)`,
+                scaleY: barStretchY,
+              }}
+              className="absolute w-px will-change-transform"
+              animate={{
+                opacity: [b.opacity * 0.5, b.opacity, b.opacity * 0.5],
+              }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                delay: b.delay,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Floor perspective lines (vanishing into center) */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-40"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 100"
         >
-          <img
-            src={project.cover_image}
-            alt=""
-            aria-hidden
-            className="w-full h-full object-cover"
-            loading="lazy"
+          <defs>
+            <linearGradient id={`floor-${index}`} x1="0" y1="100%" x2="0" y2="0%">
+              <stop offset="0%" stopColor={`rgba(${accent.rgb}, 0.6)`} />
+              <stop offset="100%" stopColor={`rgba(${accent.rgb}, 0)`} />
+            </linearGradient>
+          </defs>
+          {[20, 35, 50, 65, 80].map((x) => (
+            <line
+              key={x}
+              x1={x}
+              y1="100"
+              x2="50"
+              y2="55"
+              stroke={`url(#floor-${index})`}
+              strokeWidth="0.15"
+            />
+          ))}
+        </svg>
+
+        {/* Particles */}
+        {particles.map((p, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full will-change-transform"
+            style={{
+              left: `${p.left}%`,
+              top: `${p.top}%`,
+              width: p.size,
+              height: p.size,
+              background: `rgba(${accent.rgb}, 0.9)`,
+              boxShadow: `0 0 6px rgba(${accent.rgb}, 0.8)`,
+            }}
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1.4, 0.5],
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              delay: p.delay,
+              ease: "easeInOut",
+            }}
           />
-        </motion.div>
-      ) : (
-        <div className="absolute inset-0 bg-neutral-900" />
-      )}
-      {/* Dark gradient overlay for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/85" />
-      <div className="absolute inset-0 bg-black/30" />
+        ))}
+      </motion.div>
+
+      {/* Vanishing-point glow */}
+      <motion.div
+        style={{
+          scale: glowScale,
+          opacity: glowOpacity,
+          background: `radial-gradient(circle, rgba(${accent.rgb}, 0.55) 0%, transparent 60%)`,
+        }}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] will-change-transform"
+      />
+
+      {/* Subtle vignette for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
     </motion.div>
   );
 };
@@ -168,11 +298,13 @@ const ProjectForeground = ({
   index,
   count,
   progress,
+  accent,
 }: {
   project: Project;
   index: number;
   count: number;
   progress: MotionValue<number>;
+  accent: { hue: string; rgb: string };
 }) => {
   const start = index / count;
   const end = (index + 1) / count;
@@ -183,37 +315,49 @@ const ProjectForeground = ({
     [start - span * 0.1, start + span * 0.2, end - span * 0.2, end + span * 0.1],
     [0, 1, 1, 0]
   );
-  const y = useTransform(
-    progress,
-    [start, end],
-    [60, -60]
-  );
+  const y = useTransform(progress, [start, end], [40, -40]);
+
+  const accentText = `hsl(${accent.hue})`;
 
   return (
     <motion.div
       style={{ opacity, y }}
-      className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-20 pointer-events-none"
+      className="absolute inset-0 flex flex-col items-center justify-center px-5 sm:px-6 text-center z-20 pointer-events-none"
     >
-      <div className="text-[11px] md:text-xs uppercase tracking-[0.4em] mb-6 font-mono text-[hsl(168_70%_55%)]">
+      <div
+        className="text-[10px] sm:text-[11px] md:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-3 sm:mb-5 font-mono"
+        style={{ color: accentText }}
+      >
         {project.category || "PROJECT"} · {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
       </div>
 
-      <h2 className="heading-display text-white font-black leading-[0.9] tracking-[-0.04em] text-[clamp(3rem,12vw,10rem)] max-w-[90vw] break-words drop-shadow-2xl">
+      <h2
+        className="heading-display text-white font-black leading-[0.95] tracking-[-0.03em] max-w-[92vw] break-words"
+        style={{
+          fontSize: "clamp(2rem, 9vw, 7rem)",
+          textShadow: `0 0 40px rgba(${accent.rgb}, 0.35)`,
+        }}
+      >
         {project.title}
       </h2>
 
       {project.short_description && (
-        <p className="mt-8 max-w-2xl text-base md:text-lg text-white/85 leading-relaxed">
+        <p className="mt-4 sm:mt-6 max-w-md sm:max-w-xl text-xs sm:text-sm md:text-base text-white/80 leading-relaxed">
           {project.short_description}
         </p>
       )}
 
       {project.tools && project.tools.length > 0 && (
-        <div className="flex flex-wrap gap-2 justify-center mt-6">
-          {project.tools.slice(0, 5).map((tool) => (
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center mt-4 sm:mt-5">
+          {project.tools.slice(0, 4).map((tool) => (
             <span
               key={tool}
-              className="text-[10px] uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 text-white/90 backdrop-blur-sm bg-white/5"
+              className="text-[9px] sm:text-[10px] uppercase tracking-wider px-2.5 sm:px-3 py-1 rounded-full border backdrop-blur-sm"
+              style={{
+                borderColor: `rgba(${accent.rgb}, 0.4)`,
+                color: accentText,
+                background: `rgba(${accent.rgb}, 0.08)`,
+              }}
             >
               {tool}
             </span>
@@ -223,11 +367,15 @@ const ProjectForeground = ({
 
       <Link
         to={`/portfolio/${project.id}`}
-        className="mt-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white hover:gap-3 transition-all group pointer-events-auto px-5 py-3 border border-white/40 rounded-full hover:bg-white hover:text-black"
+        className="mt-6 sm:mt-8 inline-flex items-center gap-2 text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white hover:gap-3 transition-all group pointer-events-auto px-4 sm:px-5 py-2.5 sm:py-3 border rounded-full"
+        style={{
+          borderColor: `rgba(${accent.rgb}, 0.5)`,
+          background: `rgba(${accent.rgb}, 0.08)`,
+        }}
       >
         Открыть проект
         <ArrowUpRight
-          size={16}
+          size={14}
           className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
         />
       </Link>
@@ -245,7 +393,7 @@ const SegmentedProgress = ({
   progress: MotionValue<number>;
   count: number;
 }) => (
-  <div className="flex-1 max-w-2xl flex gap-2 mt-2">
+  <div className="flex-1 max-w-2xl flex gap-1 sm:gap-2 mt-1.5 sm:mt-2">
     {Array.from({ length: count }).map((_, i) => (
       <ProgressSegment key={i} index={i} count={count} progress={progress} />
     ))}
@@ -284,7 +432,7 @@ const CounterDisplay = ({
     return String(idx).padStart(2, "0");
   });
   return (
-    <div className="text-right font-mono text-sm md:text-base tabular-nums">
+    <div className="text-right font-mono text-xs sm:text-sm md:text-base tabular-nums">
       <motion.span className="text-white">{current}</motion.span>
       <span className="text-white/40"> / {String(count).padStart(2, "0")}</span>
     </div>
