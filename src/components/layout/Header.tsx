@@ -15,6 +15,9 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
+  // Логика: если мы не на главной странице, считаем фон тёмным и инвертируем логотип в белый
+  const isDarkBackground = location.pathname !== "/"; 
+
   return (
     <motion.header
       className="fixed top-0 left-0 right-0 z-50 pt-6 px-6 md:px-12 pointer-events-none"
@@ -24,17 +27,26 @@ const Header = () => {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between relative">
         
-        {/* Логотип (слева) */}
+        {/* Логотип (слева) с динамическим цветом */}
         <Link to="/" className="pointer-events-auto hover:opacity-80 transition-opacity z-10 flex-shrink-0">
-          <img src={navbarIcon} alt="Rasul Kapash" className="h-7 md:h-8 w-auto" />
+          <img 
+            src={navbarIcon} 
+            alt="Rasul Kapash" 
+            className={`h-7 md:h-8 w-auto transition-all duration-300 ${
+              isDarkBackground ? "brightness-0 invert" : ""
+            }`} 
+          />
         </Link>
 
-        {/* Десктопное меню (центрированная "таблетка") */}
-        <nav className="hidden md:flex items-center gap-1 bg-white px-2 py-1.5 rounded-full shadow-lg pointer-events-auto absolute left-1/2 transform -translate-x-1/2">
+        {/* Десктопное меню (центрированная белая "таблетка") */}
+        <nav className="hidden md:flex items-center gap-1 bg-white px-1.5 py-1.5 rounded-full shadow-sm pointer-events-auto absolute left-1/2 transform -translate-x-1/2 border border-gray-100">
           {navLinks.map((link, i) => {
             const isActive = location.pathname === link.to;
-            const baseClass = "text-sm font-medium px-4 py-2 rounded-full transition-all duration-200";
-            const activeClass = isActive ? "bg-gray-100 text-black" : "text-gray-600 hover:text-black hover:bg-gray-50";
+            // Стили для активного элемента (с тонкой черной обводкой) и обычного
+            const baseClass = "text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 border";
+            const activeClass = isActive 
+              ? "border-black text-black bg-transparent" 
+              : "border-transparent text-gray-500 hover:text-black hover:bg-gray-100";
 
             return link.external ? (
               <motion.a
@@ -42,7 +54,7 @@ const Header = () => {
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${baseClass} text-gray-600 hover:text-black hover:bg-gray-50`}
+                className={`${baseClass} border-transparent text-gray-500 hover:text-black hover:bg-gray-100`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.08 }}
@@ -64,9 +76,9 @@ const Header = () => {
           })}
         </nav>
 
-        {/* Бургер для мобилок (справа) */}
+        {/* Бургер для мобилок (справа) - всегда на белом фоне для видимости */}
         <button
-          className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-lg z-50 relative flex-shrink-0"
+          className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 z-50 relative flex-shrink-0"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -96,11 +108,11 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Выпадающее мобильное меню (парящая карточка) */}
+      {/* Выпадающее мобильное меню */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className="md:hidden absolute top-20 right-6 left-6 bg-white rounded-2xl shadow-2xl overflow-hidden pointer-events-auto border border-gray-100"
+            className="md:hidden absolute top-20 right-6 left-6 bg-white rounded-2xl shadow-xl overflow-hidden pointer-events-auto border border-gray-100"
             initial={{ height: 0, opacity: 0, y: -10 }}
             animate={{ height: "auto", opacity: 1, y: 0 }}
             exit={{ height: 0, opacity: 0, y: -10 }}
@@ -109,8 +121,10 @@ const Header = () => {
             <nav className="flex flex-col p-4 gap-2">
               {navLinks.map((link, i) => {
                 const isActive = location.pathname === link.to;
-                const baseMobileClass = "text-sm font-medium px-4 py-3 rounded-xl transition-colors";
-                const activeMobileClass = isActive ? "bg-gray-100 text-black" : "text-gray-600 hover:text-black hover:bg-gray-50";
+                const baseMobileClass = "text-sm font-medium px-4 py-3 rounded-xl transition-all border";
+                const activeMobileClass = isActive 
+                  ? "border-black text-black bg-transparent" 
+                  : "border-transparent text-gray-500 hover:text-black hover:bg-gray-50";
 
                 return link.external ? (
                   <motion.a
@@ -119,7 +133,7 @@ const Header = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMenuOpen(false)}
-                    className={`${baseMobileClass} text-gray-600 hover:text-black hover:bg-gray-50`}
+                    className={`${baseMobileClass} border-transparent text-gray-500 hover:text-black hover:bg-gray-50`}
                     initial={{ opacity: 0, x: -15 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.06 }}
