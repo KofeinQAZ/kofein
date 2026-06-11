@@ -7,22 +7,11 @@ import {
   useScroll,
   useTransform,
   MotionValue,
-  useSpring,
 } from "framer-motion";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
-
-// Accent colors that rotate per project (matches Ahmed Asif vibe but keeps our brand)
-const ACCENTS = [
-  "168 70% 55%", // turquoise (brand)
-  "32 95% 60%",  // amber
-  "0 75% 60%",   // red
-  "265 70% 65%", // violet
-  "210 90% 60%", // blue
-  "140 60% 55%", // green
-];
 
 const FeaturedProjectsScroll = () => {
   const { data: projects, isLoading } = useQuery({
@@ -44,35 +33,37 @@ const FeaturedProjectsScroll = () => {
     offset: ["start start", "end end"],
   });
 
-  // Smooth scroll for tunnel motion
-  const smooth = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    mass: 0.3,
-  });
-
   if (isLoading) return null;
   if (!projects || projects.length === 0) return null;
 
   const count = projects.length;
-  // Each project gets ~150vh of scroll so it really "locks"
-  const sectionHeight = `${count * 150}vh`;
+  // Each project = 1 full viewport of scroll (acts like a slider step)
+  const sectionHeight = `${count * 100}vh`;
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[hsl(0_0%_4%)] text-white"
+      className="relative bg-black text-white"
       style={{ height: sectionHeight }}
     >
+      {/* Sticky stage that pins while we scroll through all projects */}
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* TUNNEL BACKGROUND — animates with scroll */}
-        <TunnelBackground progress={smooth} projects={projects} />
+        {/* Layered parallax backgrounds (one per project) */}
+        {projects.map((project, i) => (
+          <ProjectBackdrop
+            key={project.id}
+            project={project}
+            index={i}
+            count={count}
+            progress={scrollYProgress}
+          />
+        ))}
 
-        {/* TOP PROGRESS BAR */}
+        {/* Top progress + counter */}
         <div className="absolute top-0 inset-x-0 z-30 pt-6 px-6 md:px-12">
           <div className="max-w-7xl mx-auto flex items-start justify-between gap-6">
             <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white/60 font-mono">
-              / 0{count} · WORK
+              / {String(count).padStart(2, "0")} · WORK
               <div className="text-white/40 mt-1 text-[10px]">SELECTED PROJECTS</div>
             </div>
             <SegmentedProgress progress={scrollYProgress} count={count} />
@@ -80,27 +71,23 @@ const FeaturedProjectsScroll = () => {
           </div>
         </div>
 
-        {/* PROJECT STAGE */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Foreground content per project */}
+        <div className="absolute inset-0">
           {projects.map((project, i) => (
-            <ProjectStage
+            <ProjectForeground
               key={project.id}
               project={project}
               index={i}
               count={count}
               progress={scrollYProgress}
-              accent={ACCENTS[i % ACCENTS.length]}
             />
           ))}
         </div>
 
-        {/* SIDE JUMP NAV */}
-        <SideJumpNav progress={scrollYProgress} projects={projects} />
-
-        {/* BOTTOM CTA */}
+        {/* Bottom hint */}
         <div className="absolute bottom-6 inset-x-0 z-30 flex flex-col items-center gap-1 pointer-events-none">
           <p className="text-[10px] uppercase tracking-[0.4em] text-white/50">
-            DRIVE THROUGH
+            SCROLL
           </p>
           <motion.div
             animate={{ y: [0, 6, 0] }}
@@ -115,133 +102,137 @@ const FeaturedProjectsScroll = () => {
 };
 
 /* ============================================================
-   TUNNEL BACKGROUND — vertical light bars in perspective
+   PROJECT BACKDROP — parallax zoom-in cover image per project
    ============================================================ */
-const TunnelBackground = ({
+const ProjectBackdrop = ({
+  project,
+  index,
+  count,
   progress,
-  projects,
 }: {
+  project: Project;
+  index: number;
+  count: number;
   progress: MotionValue<number>;
-  projects: Project[];
 }) => {
-  // Color shifts between accents as you scroll
-  const count = projects.length;
-  const accentHue = useTransform(progress, (p) => {
-    const idx = Math.min(Math.floor(p * count), count - 1);
-    return ACCENTS[idx % ACCENTS.length];
-  });
+  const start = index / count;
+  const end = (index + 1) / count;
+  const mid = (start + end) / 2;
+  // Visible during its segment with small overlap for crossfade
+  const fadeIn = Math.max(0, start - 0.5 / count);
+  const fadeOut = Math.min(1, end + 0.5 / count);
 
-  // Tunnel "pull" — bars stretch as you scroll giving motion feel
-  const tunnelScale = useTransform(progress, [0, 1], [1, 2.5]);
-  const tunnelOpacity = useTransform(progress, [0, 0.05, 0.95, 1], [0, 1, 1, 0]);
+  const opacity = useTransform(
+    progress,
+    [fadeIn, start, end, fadeOut],
+    [0, 1, 1, 0]
+  );
+
+  // Parallax zoom: scale from 1 → 1.35 across the segment
+  const scale = useTransform(progress, [start, end], [1, 1.35]);
+  // Subtle vertical drift
+  const y = useTransform(progress, [start, end], ["0%", "-8%"]);
 
   return (
     <motion.div
-      style={{ opacity: tunnelOpacity }}
-      className="absolute inset-0 pointer-events-none"
+      style={{ opacity }}
+      className="absolute inset-0 will-change-[opacity]"
     >
-      {/* Radial accent glow at the vanishing point */}
-      <motion.div
-        style={{
-          background: useTransform(
-            accentHue,
-            (h) =>
-              `radial-gradient(ellipse 60% 50% at 50% 55%, hsl(${h} / 0.35), transparent 70%)`
-          ),
-        }}
-        className="absolute inset-0"
-      />
-
-      {/* Vertical light bars (tunnel walls) */}
-      <motion.div
-        style={{ scale: tunnelScale }}
-        className="absolute inset-0 flex items-center justify-center"
-      >
-        <div className="relative w-full h-full">
-          {Array.from({ length: 24 }).map((_, i) => {
-            const side = i < 12 ? -1 : 1;
-            const idx = i % 12;
-            // Distance from center — closer to edges = closer to camera
-            const offset = (idx + 1) / 12;
-            const left = 50 + side * offset * 55;
-            const height = 30 + offset * 70;
-            const blur = (1 - offset) * 8;
-            return (
-              <motion.div
-                key={i}
-                className="absolute top-1/2 -translate-y-1/2 w-[2px] rounded-full"
-                style={{
-                  left: `${left}%`,
-                  height: `${height}%`,
-                  filter: `blur(${blur}px)`,
-                  background: useTransform(
-                    accentHue,
-                    (h) =>
-                      `linear-gradient(to bottom, transparent, hsl(${h} / 0.9), transparent)`
-                  ),
-                  opacity: 0.3 + offset * 0.7,
-                }}
-              />
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* Floor perspective lines */}
-      <motion.div
-        style={{ scale: tunnelScale }}
-        className="absolute inset-0 flex items-end justify-center pb-[15%]"
-      >
+      {project.cover_image ? (
         <motion.div
-          className="w-[2px] h-[40%]"
-          style={{
-            background: useTransform(
-              accentHue,
-              (h) => `linear-gradient(to top, hsl(${h} / 0.8), transparent)`
-            ),
-          }}
-        />
-      </motion.div>
-
-      {/* Particles */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <Particle key={i} index={i} progress={progress} accentHue={accentHue} />
-      ))}
-
-      {/* Vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,hsl(0_0%_4%)_85%)]" />
+          style={{ scale, y }}
+          className="absolute inset-0 will-change-transform"
+        >
+          <img
+            src={project.cover_image}
+            alt=""
+            aria-hidden
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </motion.div>
+      ) : (
+        <div className="absolute inset-0 bg-neutral-900" />
+      )}
+      {/* Dark gradient overlay for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/85" />
+      <div className="absolute inset-0 bg-black/30" />
     </motion.div>
   );
 };
 
-const Particle = ({
+/* ============================================================
+   PROJECT FOREGROUND — title, meta, CTA
+   ============================================================ */
+const ProjectForeground = ({
+  project,
   index,
+  count,
   progress,
-  accentHue,
 }: {
+  project: Project;
   index: number;
+  count: number;
   progress: MotionValue<number>;
-  accentHue: MotionValue<string>;
 }) => {
-  const seed = (index * 137.5) % 100;
-  const x = `${(seed * 7.3) % 100}%`;
-  const baseY = (seed * 3.1) % 100;
-  const y = useTransform(progress, [0, 1], [`${baseY}%`, `${(baseY + 80) % 100}%`]);
-  const opacity = useTransform(progress, [0, 0.1, 0.9, 1], [0, 0.8, 0.8, 0]);
-  const size = 1 + (seed % 3);
+  const start = index / count;
+  const end = (index + 1) / count;
+  const span = end - start;
+
+  const opacity = useTransform(
+    progress,
+    [start - span * 0.1, start + span * 0.2, end - span * 0.2, end + span * 0.1],
+    [0, 1, 1, 0]
+  );
+  const y = useTransform(
+    progress,
+    [start, end],
+    [60, -60]
+  );
+
   return (
     <motion.div
-      className="absolute rounded-full"
-      style={{
-        left: x,
-        top: y,
-        width: size,
-        height: size,
-        opacity,
-        background: useTransform(accentHue, (h) => `hsl(${h})`),
-        boxShadow: useTransform(accentHue, (h) => `0 0 ${size * 4}px hsl(${h})`),
-      }}
-    />
+      style={{ opacity, y }}
+      className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-20 pointer-events-none"
+    >
+      <div className="text-[11px] md:text-xs uppercase tracking-[0.4em] mb-6 font-mono text-[hsl(168_70%_55%)]">
+        {project.category || "PROJECT"} · {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
+      </div>
+
+      <h2 className="heading-display text-white font-black leading-[0.9] tracking-[-0.04em] text-[clamp(3rem,12vw,10rem)] max-w-[90vw] break-words drop-shadow-2xl">
+        {project.title}
+      </h2>
+
+      {project.short_description && (
+        <p className="mt-8 max-w-2xl text-base md:text-lg text-white/85 leading-relaxed">
+          {project.short_description}
+        </p>
+      )}
+
+      {project.tools && project.tools.length > 0 && (
+        <div className="flex flex-wrap gap-2 justify-center mt-6">
+          {project.tools.slice(0, 5).map((tool) => (
+            <span
+              key={tool}
+              className="text-[10px] uppercase tracking-wider px-3 py-1 rounded-full border border-white/30 text-white/90 backdrop-blur-sm bg-white/5"
+            >
+              {tool}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <Link
+        to={`/portfolio/${project.id}`}
+        className="mt-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white hover:gap-3 transition-all group pointer-events-auto px-5 py-3 border border-white/40 rounded-full hover:bg-white hover:text-black"
+      >
+        Открыть проект
+        <ArrowUpRight
+          size={16}
+          className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
+        />
+      </Link>
+    </motion.div>
   );
 };
 
@@ -298,183 +289,6 @@ const CounterDisplay = ({
       <motion.span className="text-white">{current}</motion.span>
       <span className="text-white/40"> / {String(count).padStart(2, "0")}</span>
     </div>
-  );
-};
-
-/* ============================================================
-   SIDE JUMP NAV
-   ============================================================ */
-const SideJumpNav = ({
-  progress,
-  projects,
-}: {
-  progress: MotionValue<number>;
-  projects: Project[];
-}) => {
-  const count = projects.length;
-  return (
-    <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 hidden md:flex flex-col gap-3">
-      <div className="text-[10px] uppercase tracking-[0.4em] text-white/40 mb-2 text-right">
-        JUMP
-      </div>
-      {projects.map((p, i) => (
-        <JumpItem
-          key={p.id}
-          index={i}
-          count={count}
-          progress={progress}
-          title={p.title}
-        />
-      ))}
-    </div>
-  );
-};
-
-const JumpItem = ({
-  index,
-  count,
-  progress,
-  title,
-}: {
-  index: number;
-  count: number;
-  progress: MotionValue<number>;
-  title: string;
-}) => {
-  const opacity = useTransform(progress, (p) => {
-    const idx = Math.min(Math.floor(p * count), count - 1);
-    return idx === index ? 1 : 0.35;
-  });
-  const lineWidth = useTransform(progress, (p) => {
-    const idx = Math.min(Math.floor(p * count), count - 1);
-    return idx === index ? "32px" : "12px";
-  });
-  return (
-    <motion.div
-      style={{ opacity }}
-      className="flex items-center justify-end gap-3 text-right"
-    >
-      <span className="text-xs font-mono text-white max-w-[140px] truncate">
-        {title}
-      </span>
-      <motion.div style={{ width: lineWidth }} className="h-[1px] bg-white" />
-    </motion.div>
-  );
-};
-
-/* ============================================================
-   PROJECT STAGE — huge brand-style title + meta
-   ============================================================ */
-const ProjectStage = ({
-  project,
-  index,
-  count,
-  progress,
-  accent,
-}: {
-  project: Project;
-  index: number;
-  count: number;
-  progress: MotionValue<number>;
-  accent: string;
-}) => {
-  const start = index / count;
-  const end = (index + 1) / count;
-  const span = end - start;
-
-  // Fade window: enter quickly, hold long, exit quickly
-  const opacity = useTransform(
-    progress,
-    [start - span * 0.15, start + span * 0.15, end - span * 0.15, end + span * 0.15],
-    [0, 1, 1, 0]
-  );
-  // Slide up through center
-  const y = useTransform(
-    progress,
-    [start - span * 0.4, start + span * 0.5, end + span * 0.4],
-    [120, 0, -120]
-  );
-  // Subtle scale
-  const scale = useTransform(
-    progress,
-    [start - span * 0.4, start + span * 0.5, end + span * 0.4],
-    [0.92, 1, 1.08]
-  );
-  // Blur in/out
-  const filter = useTransform(
-    progress,
-    [start - span * 0.2, start + span * 0.1, end - span * 0.1, end + span * 0.2],
-    ["blur(20px)", "blur(0px)", "blur(0px)", "blur(20px)"]
-  );
-
-  return (
-    <motion.div
-      style={{ opacity, y, scale, filter }}
-      className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
-    >
-      {/* Kicker */}
-      <div
-        className="text-[11px] md:text-xs uppercase tracking-[0.4em] mb-6 font-mono"
-        style={{ color: `hsl(${accent})` }}
-      >
-        {project.category || "PROJECT"} · {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
-      </div>
-
-      {/* HUGE TITLE — like "Microsoft" / "Amazon" */}
-      <h2 className="heading-display text-white font-black leading-[0.9] tracking-[-0.04em] text-[clamp(3.5rem,14vw,12rem)] max-w-[90vw] break-words">
-        {project.title}
-      </h2>
-
-      {/* Short description */}
-      {project.short_description && (
-        <p className="mt-8 max-w-2xl text-base md:text-lg text-white/70 leading-relaxed">
-          {project.short_description}
-        </p>
-      )}
-
-      {/* Cover image — small floating preview */}
-      {project.cover_image && (
-        <div className="mt-8 w-32 md:w-40 aspect-[4/3] rounded-lg overflow-hidden shadow-2xl border border-white/10">
-          <img
-            src={project.cover_image}
-            alt={project.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      {/* Tools */}
-      {project.tools && project.tools.length > 0 && (
-        <div className="flex flex-wrap gap-2 justify-center mt-6">
-          {project.tools.slice(0, 5).map((tool) => (
-            <span
-              key={tool}
-              className="text-[10px] uppercase tracking-wider px-3 py-1 rounded-full border"
-              style={{
-                borderColor: `hsl(${accent} / 0.5)`,
-                color: `hsl(${accent})`,
-              }}
-            >
-              {tool}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* CTA */}
-      <Link
-        to={`/portfolio/${project.id}`}
-        className="mt-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white hover:gap-3 transition-all group"
-      >
-        VISIT {project.title.toUpperCase().slice(0, 12)}
-        <ArrowUpRight
-          size={16}
-          className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"
-          style={{ color: `hsl(${accent})` }}
-        />
-      </Link>
-    </motion.div>
   );
 };
 
