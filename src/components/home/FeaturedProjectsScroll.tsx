@@ -117,21 +117,20 @@ const ProjectBackdrop = ({
 }) => {
   const start = index / count;
   const end = (index + 1) / count;
-  const mid = (start + end) / 2;
-  // Visible during its segment with small overlap for crossfade
-  const fadeIn = Math.max(0, start - 0.5 / count);
-  const fadeOut = Math.min(1, end + 0.5 / count);
+  // Tight crossfade right at the boundary so only one image is visible at a time
+  const cf = 0.04 / count; // ~4% of one segment
+  const fadeIn = Math.max(0, start - cf);
+  const fadeOut = Math.min(1, end + cf);
 
   const opacity = useTransform(
     progress,
-    [fadeIn, start, end, fadeOut],
+    [fadeIn, start + cf, end - cf, fadeOut],
     [0, 1, 1, 0]
   );
 
-  // Parallax zoom: scale from 1 → 1.35 across the segment
-  const scale = useTransform(progress, [start, end], [1, 1.35]);
-  // Subtle vertical drift
-  const y = useTransform(progress, [start, end], ["0%", "-8%"]);
+  // Strong parallax zoom: bg "approaches" the viewer through the whole segment
+  const scale = useTransform(progress, [start, end], [1.05, 1.5]);
+  const y = useTransform(progress, [start, end], ["3%", "-6%"]);
 
   return (
     <motion.div

@@ -66,7 +66,7 @@ const pillPop = {
 
 const Index = () => {
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="min-h-[90vh] flex items-center px-6 md:px-12 max-w-7xl mx-auto pt-12 md:pt-0">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center w-full">
