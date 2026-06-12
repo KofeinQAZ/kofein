@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,10 +13,33 @@ const navLinks = [
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [overDarkSection, setOverDarkSection] = useState(false);
   const location = useLocation();
 
-  // Логика: если мы не на главной странице, считаем фон тёмным и инвертируем логотип в белый
-  const isDarkBackground = location.pathname !== "/"; 
+  // Detect when navbar overlaps a section flagged data-nav-theme="dark"
+  useEffect(() => {
+    setOverDarkSection(false);
+    const check = () => {
+      const els = document.querySelectorAll<HTMLElement>('[data-nav-theme="dark"]');
+      const probeY = 40; // top of viewport just under navbar
+      let isDark = false;
+      els.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top <= probeY && r.bottom >= probeY) isDark = true;
+      });
+      setOverDarkSection(isDark);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [location.pathname]);
+
+  // Inverted logo on non-home pages OR when over dark scroll section
+  const isDarkBackground = location.pathname !== "/" || overDarkSection;
 
   return (
     <motion.header
