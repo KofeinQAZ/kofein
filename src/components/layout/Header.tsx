@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Instagram, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import navbarIcon from "@/assets/navbar-icon.svg";
+
+const INSTAGRAM_URL = "https://instagram.com/kapash.rsl";
+const EMAIL_ADDRESS = "kapasrasul@gmail.com";
 
 const navLinks = [
   { to: "/", label: "Главная" },
