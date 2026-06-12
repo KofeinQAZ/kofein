@@ -13,7 +13,6 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Project = Tables<"projects">;
 
-/** Accent palette cycled per project (hue, rgb for glow) */
 const ACCENTS = [
   { name: "blue",   hue: "210 100% 65%", rgb: "92, 160, 255" },
   { name: "amber",  hue: "32 100% 60%",  rgb: "255, 160, 60" },
@@ -52,10 +51,14 @@ const FeaturedProjectsScroll = () => {
   return (
     <section
       ref={sectionRef}
+      data-nav-theme="dark"
       className="relative bg-black text-white"
       style={{ height: sectionHeight }}
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div
+        className="sticky top-0 h-screen w-full overflow-hidden"
+        style={{ perspective: "1200px" }}
+      >
         {/* Parallax tunnel backgrounds — one per project, crossfaded */}
         {projects.map((project, i) => (
           <TunnelBackdrop
@@ -67,8 +70,8 @@ const FeaturedProjectsScroll = () => {
           />
         ))}
 
-        {/* Top progress + counter */}
-        <div className="absolute top-0 inset-x-0 z-30 pt-5 px-4 sm:px-6 md:px-12">
+        {/* Top progress + counter — pushed below the fixed navbar */}
+        <div className="absolute top-0 inset-x-0 z-30 pt-24 sm:pt-28 px-4 sm:px-6 md:px-12">
           <div className="max-w-7xl mx-auto flex items-start justify-between gap-3 sm:gap-6">
             <div className="text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-white/60 font-mono">
               / {String(count).padStart(2, "0")} · WORK
@@ -111,8 +114,9 @@ const FeaturedProjectsScroll = () => {
 };
 
 /* ============================================================
-   TUNNEL BACKDROP — vertical light bars in perspective,
-   particles, vanishing-point glow. Parallax-zooms with scroll.
+   TUNNEL BACKDROP — true camera-through-tunnel parallax.
+   Bars are positioned with 3D translateZ and fly past camera
+   as scroll progresses through this segment.
    ============================================================ */
 const TunnelBackdrop = ({
   index,
@@ -137,24 +141,37 @@ const TunnelBackdrop = ({
     [0, 1, 1, 0]
   );
 
-  // "Drive into the tunnel": bars stretch and zoom toward camera
-  const scale = useTransform(progress, [start, end], [1, 1.6]);
-  const barStretchY = useTransform(progress, [start, end], [1, 1.25]);
-  const glowScale = useTransform(progress, [start, end], [0.8, 1.8]);
-  const glowOpacity = useTransform(progress, [start, end], [0.45, 0.9]);
+  // Local segment progress 0 → 1
+  const local = useTransform(progress, [start, end], [0, 1]);
 
-  // Deterministic bar positions (so it stays stable, not random per render)
+  // Camera-forward push for the whole tunnel
+  const cameraZ = useTransform(local, [0, 1], [0, 900]);
+  const glowScale = useTransform(local, [0, 1], [0.7, 2.2]);
+  const glowOpacity = useTransform(local, [0, 1], [0.4, 0.95]);
+
+  // Deterministic bar layout — each bar gets a depth (z) and side offset
   const bars = useMemo(() => {
-    const arr: { left: number; height: number; opacity: number; delay: number }[] = [];
+    const arr: {
+      side: number;       // -1 left, +1 right
+      offsetX: number;    // distance from center in vw
+      z: number;          // depth (-1500 far → 0 near)
+      heightVh: number;
+      opacity: number;
+      delay: number;
+    }[] = [];
     const seed = index * 13 + 7;
-    for (let i = 0; i < 22; i++) {
-      const t = (i + 1) / 23;
-      // Distribute bars away from center (vanishing point)
-      const offset = (t - 0.5) * 100;
+    const N = 26;
+    for (let i = 0; i < N; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      const depthT = i / N; // 0 near, 1 far
+      const z = -depthT * 1500 - 50;
+      const offsetX = 15 + ((i * 7 + seed) % 25) + depthT * 10;
       arr.push({
-        left: 50 + offset,
-        height: 45 + ((i * 17 + seed) % 45),
-        opacity: 0.25 + ((i * 11) % 60) / 100,
+        side,
+        offsetX,
+        z,
+        heightVh: 50 + ((i * 17 + seed) % 40),
+        opacity: 0.35 + ((i * 11) % 55) / 100,
         delay: (i * 0.07) % 1.4,
       });
     }
@@ -162,12 +179,13 @@ const TunnelBackdrop = ({
   }, [index]);
 
   const particles = useMemo(() => {
-    const arr: { left: number; top: number; size: number; delay: number; duration: number }[] = [];
+    const arr: { x: number; y: number; z: number; size: number; delay: number; duration: number }[] = [];
     const seed = index * 31 + 3;
-    for (let i = 0; i < 28; i++) {
+    for (let i = 0; i < 36; i++) {
       arr.push({
-        left: ((i * 53 + seed) % 100),
-        top: ((i * 37 + seed * 2) % 80) + 10,
+        x: ((i * 53 + seed) % 100) - 50,
+        y: ((i * 37 + seed * 2) % 80) - 40,
+        z: -((i * 97 + seed) % 1400) - 100,
         size: 1 + ((i + seed) % 3),
         delay: ((i * 0.13) % 2),
         duration: 2.5 + ((i * 0.31) % 2.5),
@@ -181,7 +199,7 @@ const TunnelBackdrop = ({
       style={{ opacity }}
       className="absolute inset-0 will-change-[opacity]"
     >
-      {/* Base gradient — darker than pure black for depth */}
+      {/* Base radial */}
       <div
         className="absolute inset-0"
         style={{
@@ -189,52 +207,53 @@ const TunnelBackdrop = ({
         }}
       />
 
-      {/* Tunnel — zooms with scroll */}
+      {/* 3D stage — camera moves forward by translating Z */}
       <motion.div
-        style={{ scale }}
+        style={{
+          translateZ: cameraZ,
+          transformStyle: "preserve-3d",
+        }}
         className="absolute inset-0 will-change-transform"
       >
-        {/* Vertical light bars */}
-        <div className="absolute inset-0">
-          {bars.map((b, i) => (
-            <motion.div
-              key={i}
-              style={{
-                left: `${b.left}%`,
-                top: `${50 - b.height / 2}%`,
-                height: `${b.height}%`,
-                opacity: b.opacity,
-                background: `linear-gradient(to bottom, transparent, rgba(${accent.rgb}, 0.9), transparent)`,
-                boxShadow: `0 0 12px rgba(${accent.rgb}, 0.6)`,
-                scaleY: barStretchY,
-              }}
-              className="absolute w-px will-change-transform"
-              animate={{
-                opacity: [b.opacity * 0.5, b.opacity, b.opacity * 0.5],
-              }}
-              transition={{
-                duration: 2.4,
-                repeat: Infinity,
-                delay: b.delay,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </div>
+        {/* Vertical light bars in 3D */}
+        {bars.map((b, i) => (
+          <motion.div
+            key={i}
+            className="absolute left-1/2 top-1/2 w-px will-change-transform"
+            style={{
+              height: `${b.heightVh}vh`,
+              marginTop: `-${b.heightVh / 2}vh`,
+              translateX: `${b.side * b.offsetX}vw`,
+              translateZ: b.z,
+              opacity: b.opacity,
+              background: `linear-gradient(to bottom, transparent, rgba(${accent.rgb}, 0.95), transparent)`,
+              boxShadow: `0 0 14px rgba(${accent.rgb}, 0.7)`,
+            }}
+            animate={{
+              opacity: [b.opacity * 0.5, b.opacity, b.opacity * 0.5],
+            }}
+            transition={{
+              duration: 2.4,
+              repeat: Infinity,
+              delay: b.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
 
         {/* Floor perspective lines (vanishing into center) */}
         <svg
-          className="absolute inset-0 w-full h-full opacity-40"
+          className="absolute inset-0 w-full h-full opacity-50"
           preserveAspectRatio="none"
           viewBox="0 0 100 100"
         >
           <defs>
             <linearGradient id={`floor-${index}`} x1="0" y1="100%" x2="0" y2="0%">
-              <stop offset="0%" stopColor={`rgba(${accent.rgb}, 0.6)`} />
+              <stop offset="0%" stopColor={`rgba(${accent.rgb}, 0.7)`} />
               <stop offset="100%" stopColor={`rgba(${accent.rgb}, 0)`} />
             </linearGradient>
           </defs>
-          {[20, 35, 50, 65, 80].map((x) => (
+          {[10, 25, 40, 50, 60, 75, 90].map((x) => (
             <line
               key={x}
               x1={x}
@@ -242,27 +261,30 @@ const TunnelBackdrop = ({
               x2="50"
               y2="55"
               stroke={`url(#floor-${index})`}
-              strokeWidth="0.15"
+              strokeWidth="0.12"
             />
           ))}
+          {/* Horizon line */}
+          <line x1="0" y1="55" x2="100" y2="55" stroke={`rgba(${accent.rgb}, 0.15)`} strokeWidth="0.1" />
         </svg>
 
-        {/* Particles */}
+        {/* Particles in 3D space */}
         {particles.map((p, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full will-change-transform"
+            className="absolute left-1/2 top-1/2 rounded-full will-change-transform"
             style={{
-              left: `${p.left}%`,
-              top: `${p.top}%`,
               width: p.size,
               height: p.size,
-              background: `rgba(${accent.rgb}, 0.9)`,
-              boxShadow: `0 0 6px rgba(${accent.rgb}, 0.8)`,
+              translateX: `${p.x}vw`,
+              translateY: `${p.y}vh`,
+              translateZ: p.z,
+              background: `rgba(${accent.rgb}, 0.95)`,
+              boxShadow: `0 0 8px rgba(${accent.rgb}, 0.9)`,
             }}
             animate={{
               opacity: [0, 1, 0],
-              scale: [0.5, 1.4, 0.5],
+              scale: [0.5, 1.6, 0.5],
             }}
             transition={{
               duration: p.duration,
@@ -274,18 +296,18 @@ const TunnelBackdrop = ({
         ))}
       </motion.div>
 
-      {/* Vanishing-point glow */}
+      {/* Vanishing-point glow (screen-space, not in 3D) */}
       <motion.div
         style={{
           scale: glowScale,
           opacity: glowOpacity,
-          background: `radial-gradient(circle, rgba(${accent.rgb}, 0.55) 0%, transparent 60%)`,
+          background: `radial-gradient(circle, rgba(${accent.rgb}, 0.6) 0%, transparent 60%)`,
         }}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vmin] h-[40vmin] will-change-transform"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vmin] h-[45vmin] will-change-transform pointer-events-none"
       />
 
-      {/* Subtle vignette for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+      {/* Vignette for legibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80 pointer-events-none" />
     </motion.div>
   );
 };
@@ -383,9 +405,6 @@ const ProjectForeground = ({
   );
 };
 
-/* ============================================================
-   TOP PROGRESS — segmented bars
-   ============================================================ */
 const SegmentedProgress = ({
   progress,
   count,
