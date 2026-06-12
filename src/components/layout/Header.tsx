@@ -150,8 +150,11 @@ const Header = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </button>
+          </button>
+        </div>
       </div>
+
+
 
       {/* Выпадающее мобильное меню */}
       <AnimatePresence>
