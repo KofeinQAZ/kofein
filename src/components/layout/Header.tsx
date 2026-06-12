@@ -205,9 +205,30 @@ const Header = () => {
                   </motion.div>
                 );
               })}
+              <div className="flex items-center gap-2 pt-2 mt-2 border-t border-gray-100">
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Instagram"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black text-white text-sm font-medium"
+                >
+                  <Instagram size={16} /> Instagram
+                </a>
+                <a
+                  href={`mailto:${EMAIL_ADDRESS}`}
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Email"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black text-white text-sm font-medium"
+                >
+                  <Mail size={16} /> Email
+                </a>
+              </div>
             </nav>
           </motion.div>
         )}
+
       </AnimatePresence>
     </motion.header>
   );
