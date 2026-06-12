@@ -102,9 +102,28 @@ const Header = () => {
           })}
         </nav>
 
-        {/* Бургер для мобилок (справа) - всегда на белом фоне для видимости */}
-        <button
-          className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 z-50 relative flex-shrink-0"
+        {/* Right side: social buttons (desktop) + burger (mobile) */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="hidden md:inline-flex pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 hover:bg-black hover:text-white transition-colors"
+          >
+            <Instagram size={18} />
+          </a>
+          <a
+            href={`mailto:${EMAIL_ADDRESS}`}
+            aria-label="Написать на почту"
+            className="hidden md:inline-flex pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 hover:bg-black hover:text-white transition-colors"
+          >
+            <Mail size={18} />
+          </a>
+
+          {/* Бургер для мобилок (справа) - всегда на белом фоне для видимости */}
+          <button
+            className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 z-50 relative"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
