@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Instagram, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import navbarIcon from "@/assets/navbar-icon.svg";
+
+const INSTAGRAM_URL = "https://instagram.com/kapash.rsl";
+const EMAIL_ADDRESS = "kapasrasul@gmail.com";
 
 const navLinks = [
   { to: "/", label: "Главная" },
@@ -99,9 +102,28 @@ const Header = () => {
           })}
         </nav>
 
-        {/* Бургер для мобилок (справа) - всегда на белом фоне для видимости */}
-        <button
-          className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 z-50 relative flex-shrink-0"
+        {/* Right side: social buttons (desktop) + burger (mobile) */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="hidden md:inline-flex pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 hover:bg-black hover:text-white transition-colors"
+          >
+            <Instagram size={18} />
+          </a>
+          <a
+            href={`mailto:${EMAIL_ADDRESS}`}
+            aria-label="Написать на почту"
+            className="hidden md:inline-flex pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 hover:bg-black hover:text-white transition-colors"
+          >
+            <Mail size={18} />
+          </a>
+
+          {/* Бургер для мобилок (справа) - всегда на белом фоне для видимости */}
+          <button
+            className="md:hidden pointer-events-auto bg-white text-black p-2.5 rounded-full shadow-sm border border-gray-100 z-50 relative"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
@@ -128,8 +150,11 @@ const Header = () => {
               </motion.div>
             )}
           </AnimatePresence>
-        </button>
+          </button>
+        </div>
       </div>
+
+
 
       {/* Выпадающее мобильное меню */}
       <AnimatePresence>
@@ -180,9 +205,30 @@ const Header = () => {
                   </motion.div>
                 );
               })}
+              <div className="flex items-center gap-2 pt-2 mt-2 border-t border-gray-100">
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Instagram"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black text-white text-sm font-medium"
+                >
+                  <Instagram size={16} /> Instagram
+                </a>
+                <a
+                  href={`mailto:${EMAIL_ADDRESS}`}
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Email"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-black text-white text-sm font-medium"
+                >
+                  <Mail size={16} /> Email
+                </a>
+              </div>
             </nav>
           </motion.div>
         )}
+
       </AnimatePresence>
     </motion.header>
   );
