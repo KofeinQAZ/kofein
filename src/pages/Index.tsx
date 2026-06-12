@@ -196,123 +196,149 @@ const Index = () => {
       {/* Featured projects — scroll-driven */}
       <FeaturedProjectsScroll />
 
-      {/* About / Skills Section */}
-      <section className="px-6 md:px-12 pt-6 pb-20 max-w-7xl mx-auto">
-        <motion.h2
-          className="heading-display text-3xl md:text-5xl text-foreground mb-12"
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-        >
-          кто я такой<span className="text-primary">{"?"}</span>
-        </motion.h2>
+      {/* About / Skills Section — dark */}
+      <section
+        data-nav-theme="dark"
+        className="relative overflow-hidden bg-[#0a0a0a] text-white px-6 md:px-12 py-20 md:py-28"
+      >
+        {/* subtle backdrop accents */}
+        <div className="pointer-events-none absolute inset-0 opacity-60">
+          <div className="absolute -top-32 -left-24 w-[28rem] h-[28rem] rounded-full bg-primary/20 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 w-[26rem] h-[26rem] rounded-full bg-primary/10 blur-[120px]" />
+          <div
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+              backgroundSize: "60px 60px",
+            }}
+          />
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-16">
-          <div className="space-y-6">
-            <motion.p
-              className="text-base md:text-lg text-muted-foreground leading-relaxed"
-              initial={{ opacity: 0, y: 25 }}
+        <div className="relative max-w-7xl mx-auto">
+          {/* Eyebrow + heading */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="h-px w-10 bg-primary" />
+            <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-semibold">
+              About
+            </span>
+          </div>
+
+          <motion.h2
+            className="heading-display text-4xl md:text-6xl lg:text-7xl leading-[0.95] mb-14 md:mb-20 max-w-4xl"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7 }}
+          >
+            кто я такой<span className="text-primary">{"?"}</span>
+          </motion.h2>
+
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+            {/* Bio card */}
+            <motion.div
+              className="lg:col-span-5 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-7 md:p-9 flex flex-col gap-6"
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
             >
-              Графический дизайнер из Алматы. Делаю брендинг, дизайн-системы,
-              презентации и UI/UX для стартапов и образовательных проектов.
-            </motion.p>
-            <motion.img
-              src={photoBack}
-              alt="Rasul from behind"
-              className="w-56 md:w-64 h-auto object-contain mx-auto md:mx-0"
-              loading="lazy"
-              decoding="async"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-              whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
-            />
-          </div>
+              <p className="text-base md:text-lg text-white/80 leading-relaxed">
+                Графический дизайнер из Алматы. Делаю брендинг,
+                дизайн-системы, презентации и UI/UX для стартапов и
+                образовательных проектов.
+              </p>
+              <div className="flex items-center justify-center rounded-2xl bg-white/[0.04] border border-white/10 p-4">
+                <motion.img
+                  src={photoBack}
+                  alt="Rasul from behind"
+                  className="w-44 md:w-52 h-auto object-contain"
+                  loading="lazy"
+                  decoding="async"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+                />
+              </div>
+            </motion.div>
 
-          {/* Skills & Languages */}
-          <div className="space-y-10">
-            <div>
-              <motion.h3
-                className="text-xs uppercase tracking-[0.25em] text-foreground font-bold mb-5"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                СКИЛЛЫ
-              </motion.h3>
-              <motion.div
-                className="flex flex-wrap gap-2.5"
-                variants={staggerContainer}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
-              >
-                {skills.map((skill) => (
-                  <motion.span
-                    key={skill.name}
-                    variants={pillPop}
-                    whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
-                    className={`text-xs rounded-full px-5 py-2.5 font-medium cursor-default transition-shadow ${
-                      skill.style === "dark"
-                        ? "bg-foreground text-background"
-                        : skill.style === "primary"
-                        ? "border border-primary text-primary"
-                        : "bg-muted text-foreground"
-                    }`}
-                  >
-                    {skill.name}
-                  </motion.span>
-                ))}
-              </motion.div>
-            </div>
+            {/* Skills + Languages */}
+            <div className="lg:col-span-7 space-y-10">
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="h-px w-6 bg-white/40" />
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-bold">
+                    Скиллы
+                  </h3>
+                </div>
+                <motion.div
+                  className="flex flex-wrap gap-2.5"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                >
+                  {skills.map((skill) => (
+                    <motion.span
+                      key={skill.name}
+                      variants={pillPop}
+                      whileHover={{ scale: 1.06, transition: { duration: 0.2 } }}
+                      className={`text-xs md:text-sm rounded-full px-5 py-2.5 font-medium cursor-default transition-colors ${
+                        skill.style === "dark"
+                          ? "bg-white text-black"
+                          : skill.style === "primary"
+                          ? "border border-primary text-primary bg-primary/5"
+                          : "bg-white/10 text-white border border-white/10"
+                      }`}
+                    >
+                      {skill.name}
+                    </motion.span>
+                  ))}
+                </motion.div>
+              </div>
 
-            <div>
-              <motion.h3
-                className="text-xs uppercase tracking-[0.25em] text-foreground font-bold mb-5"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-              >
-                ЯЗЫКИ
-              </motion.h3>
-              <div className="flex flex-wrap gap-6">
-                {languages.map((lang, i) => (
-                  <motion.div
-                    key={lang.name}
-                    className="flex items-center gap-2.5"
-                    initial={{ opacity: 0, y: 15 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.12 }}
-                  >
-                    <motion.img
-                      src={lang.flag}
-                      alt={lang.name}
-                      className="w-7 h-7 object-contain"
-                      whileHover={{ scale: 1.2, rotate: 5, transition: { duration: 0.2 } }}
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-muted-foreground leading-tight">
-                        {lang.level}
-                      </span>
-                      <span className="text-sm font-semibold text-foreground leading-tight">
-                        {lang.name}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
+              <div>
+                <div className="flex items-center gap-3 mb-5">
+                  <span className="h-px w-6 bg-white/40" />
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-bold">
+                    Языки
+                  </h3>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-3">
+                  {languages.map((lang, i) => (
+                    <motion.div
+                      key={lang.name}
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 hover:bg-white/[0.06] transition-colors"
+                      initial={{ opacity: 0, y: 15 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                    >
+                      <motion.img
+                        src={lang.flag}
+                        alt={lang.name}
+                        className="w-9 h-9 object-contain flex-shrink-0"
+                        whileHover={{ scale: 1.15, rotate: 5, transition: { duration: 0.2 } }}
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] text-white/50 leading-tight uppercase tracking-wider">
+                          {lang.level}
+                        </span>
+                        <span className="text-sm font-semibold text-white leading-tight truncate">
+                          {lang.name}
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 };
