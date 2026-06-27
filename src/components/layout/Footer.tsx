@@ -29,9 +29,6 @@ const Footer = () => {
           <a href="mailto:kapasrasul@gmail.com" className="hover:text-primary transition-colors">
             Email
           </a>
-          <a href="https://kofeingallery.framer.website" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-            Сайт
-          </a>
         </div>
       </div>
     </footer>
