@@ -10,7 +10,7 @@ const EMAIL_ADDRESS = "kapasrasul@gmail.com";
 const navLinks = [
   { to: "/", label: "Главная" },
   { to: "/portfolio", label: "Работы" },
-  { to: "#", label: "Резюме", external: true, href: "https://drive.google.com/file/d/18WDb51psQinuYIINGwOUg7XXS5eGpgbP/view?usp=sharing" },
+  { to: "#", label: "Резюме", external: true, href: "https://drive.google.com/drive/folders/1UYCPSQOuqNXbFsKf5Zx6QrAhQQ9pxCZU?usp=drive_link" },
   { to: "/contacts", label: "Контакты" },
 ];
 
